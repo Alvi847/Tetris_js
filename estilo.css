@@ -1,0 +1,69 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+.contenedor {
+    height: 100%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;    
+}
+
+canvas#canvas {
+    display: flex;
+    justify-content: center; 
+    align-items: center;  
+}
+
+.tablero {
+    border: 10px solid black;
+    width: 50%;      
+    height: 90%;     
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    background-color: rgb(13, 13, 53);;
+    padding: 10px;
+}
+
+html {
+    margin: 0px;
+    height: 100vh;
+    width: 100vw;
+}
+
+body {
+    margin: 0px;
+    min-height: 100vh;
+    width: 100vw;
+    background-image: url('mario_bros_background.jpg');
+}
+
+main {
+    height: 100vh;
+    margin: 0px;
+    min-height: 100vh;
+}
+
+.start_rect {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    background-color: rgb(58, 58, 255);
+    border: 5px solid rgb(58, 58, 255);;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+  }
+
+#start_button {
+    width: 100px;
+    height: 50px;
+    font-size: 16px;
+    cursor: pointer;
+}
