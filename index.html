@@ -8,12 +8,36 @@
     <main>
         <div class="contenedor">
             <div class="dialogue_rect" id="start_rect">
+                <div class="title">
+                <span>Welcome to</span>
+                    <span class="red">T</span>
+                    <span class="orange">e</span>
+                    <span class="light_yellow">t</span>
+                    <span class="yellow">r</span>
+                    <span class="green">i</span>
+                    <span class="dark_green">s</span>
+                    <span class="blue">_</span>
+                    <span class="dark_blue">j</span>
+                    <span class="purple">s</span>
+                </div>
                 <button type="button" id="start_button">Start</button>
             </div>
-            <div class="tablero">
-                <canvas id="canvas"></canvas>
+            <div>
+                <canvas id="canvas" class="tablero"></canvas>
+            </div>
+            <div class="info">
+                <div>
+                    <h3 class="text-info">NEXT PIECE:</h3>
+                    <canvas id="next-piece-canvas" class="tablero"></canvas>
+                </div>
+
+                <div class="text-info-rect">
+                    <span class="text-info">Points </span>
+                    <span class="text-info">Level </span>
+                </div>
             </div>
             <div class="dialogue_rect" id="game_over_rect">
+                <span class="title">Game Over</span>
                 <button type="button" id="restart_button">Play Again</button>
             </div>
         </div>
@@ -26,3 +50,4 @@
 <script src="js/cell.js"></script>
 <script src="js/color.js"></script>
 <script src="js/gameBoard.js"></script>
+<script src="js/nextPieceVisualizer.js"></script>

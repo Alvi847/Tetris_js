@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+
+
 * {
     margin: 0;
     padding: 0;
@@ -8,25 +11,50 @@
 .contenedor {
     height: 100%;
     display: flex;
-    justify-content: center; 
-    align-items: center;    
+    justify-content: center;
+    align-items: center;
+    gap: 100px;
 }
 
-canvas#canvas {
+.info {
     display: flex;
-    justify-content: center; 
-    align-items: center;  
+    flex-direction: column;
+    gap: 20vh;
 }
 
 .tablero {
     border: 10px solid black;
-    width: 50%;      
-    height: 90%;     
-    display: flex;
-    flex-direction: column;
+    display: none;
+    justify-content: center;
     align-items: center;
-    justify-content: start;
-    background-color: rgb(13, 13, 53);;
+    background-color: rgb(13, 13, 53);
+    padding: 10px;
+}
+
+.text-info-rect{
+    border: 10px solid black;
+    display: none;
+    gap: 40%;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(13, 13, 53);
+    padding: 10px;
+    height: 20vh;
+}
+
+.text-info {
+    color: white;
+    font-family: "Pixelify Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+}
+
+.next-piece {
+    border: 10px solid black;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background-color: rgb(13, 13, 53);
     padding: 10px;
 }
 
@@ -41,6 +69,10 @@ body {
     min-height: 100vh;
     width: 100vw;
     background-image: url('mario_bros_background.jpg');
+    color: white;
+    font-family: "Pixelify Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
 }
 
 main {
@@ -51,23 +83,79 @@ main {
 
 .dialogue_rect {
     position: absolute;
-    width: 250px;
-    height: 250px;
-    background-color: rgb(58, 58, 255);
-    border: 5px solid rgb(58, 58, 255);;
+    width: 40%;
+    height: 40%;
+    background-color: rgb(0, 0, 0);
+    border: 5px solid rgb(26, 26, 26);
     display: flex;
+    flex-direction: column;
     justify-content: center;
+    gap: 20%;
     align-items: center;
     z-index: 2;
 }
- 
+
+.dialogue_rect .title {
+    font-size: 30px;
+}
+
 #game_over_rect {
     display: none;
 }
 
-#start_button, #restart_button {
+button {
     width: 100px;
     height: 50px;
+    cursor: pointer;
+    font-family: inherit;
+    background-color: #ffffff;
+    border-radius: 10px;       
+    padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+    color: black;
+}
+
+button:hover {
+    background-color: #b8b8b8;
+    border-color: #b8b8b8;
+}
+
+
+/* Colores para cada <span> del título*/
+.red {
+    color: red;
+}
+
+.orange {
+    color: orange;
+}
+
+.light_yellow {
+    color: #ffff99; /* amarillo claro */
+}
+
+.yellow {
+    color: yellow;
+}
+
+.green {
+    color: green;
+}
+
+.dark_green {
+    color: #006400; /* verde oscuro */
+}
+
+.blue {
+    color: blue;
+}
+
+.dark_blue {
+    color: #00008B; /* azul oscuro */
+}
+
+.purple {
+    color: purple;
 }

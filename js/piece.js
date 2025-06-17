@@ -164,12 +164,6 @@ class Piece {
         };
     }
 
-    static copy(b) {
-        const s = JSON.parse(JSON.stringify(b));
-        console.log(s);
-        return s;
-    }
-
     move(game_board, direction) {
         for (let i = this.#shape.length - 1; i >= 0; i--) {
             const block = this.#shape[i];
@@ -193,5 +187,21 @@ class Piece {
         let i = 0;
         while (i < this.#shape.length && !game_board.isMovementEnd(Cell.addCoords(this.#center, direction, this.#shape[i]), this)) i++;
         return i == this.#shape.length;
+    }
+
+    moveToCoords(newCoords){
+        this.#center = newCoords;
+    }
+
+    spawnInNextPieceVisualizer(center, cells){
+        this.#center = center;
+
+        cells[center.x][center.y].piece = this;
+
+        for (let i = this.#shape.length - 1; i >= 0; i--) {
+            const block = this.#shape[i];
+            const block_coords = Cell.addCoords(Cell.addCoords(this.#center, block));
+            cells[block_coords.x][block_coords.y].piece = this;
+        }
     }
 }

@@ -1,7 +1,11 @@
 ; document.addEventListener("DOMContentLoaded", init);
 
 const DELTA_TIME = 500;
-const COLUMNS = 10;
+const COLUMNS = 11;
+const MAX_PIECE_WIDTH = 5;
+const MAX_PIECE_HEIGHT = 5;
+
+const GUI_ELEMENTS_CLASSES = '.tablero, .text-info-rect';
 
 let game_board;
 
@@ -27,16 +31,27 @@ function init() {
 
 function startGame(e) {
     const button = e.target;
+    const gui_elements = document.querySelectorAll(GUI_ELEMENTS_CLASSES); 
     const canvas = document.getElementById('canvas');
     const div = document.querySelector('div.tablero');
 
-    canvas.width = 300;
-    canvas.height = 300;
+    canvas.width = 500;
+    canvas.height = 900;
 
     button.parentNode.style.display = 'none';
 
+    const next_piece_canvas = document.getElementById('next-piece-canvas');
 
-    game_board = GameBoard.createBoard(canvas);
+    next_piece_canvas.width = 150;
+    next_piece_canvas.height = 150;
+
+    for(let i = 0; i < gui_elements.length; i++){
+        gui_elements.item(i).style.display = 'flex';
+    }
+
+    const npv = NextPieceVisualizer.createNextPieceVisualizer(next_piece_canvas);
+
+    game_board = GameBoard.createBoard(canvas, npv);
 
     game_board.loadPieces();
 
