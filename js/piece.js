@@ -86,7 +86,7 @@ class Piece {
             if (name == null)
                 throw Error("All pieces must have a name");
             if (Array.isArray(pieceData.color) && pieceData.color.length === 3) {
-                const color = new RGBColor(pieceData.color[0], pieceData.color[1], pieceData.color[2]);
+                const color = RGBColor.createColorObject(Number(pieceData.color[0]), Number(pieceData.color[1]), Number(pieceData.color[2]));
 
                 let shape = pieceData.shape;
                 if (Array.isArray(shape)) {

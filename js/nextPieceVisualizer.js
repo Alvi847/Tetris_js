@@ -6,19 +6,13 @@ class NextPieceVisualizer {
     #cell_size;
     #cells;
 
+    padding_left;
+    padding_up;
+
     static createNextPieceVisualizer(canvas) {
-        const cell_size = Math.floor(canvas.width / MAX_PIECE_WIDTH);
-        const rows = Math.floor(canvas.height / cell_size);
+        const {rows, cells, cell_size, padding_left, padding_up} = Utils.initBoardValues(canvas.width, canvas.height, MAX_PIECE_WIDTH);
 
-        const cells = [];
-        for (let i = 0; i < MAX_PIECE_WIDTH; i++) {
-            cells[i] = [];
-            for (let j = 0; j < rows; j++) {
-                cells[i][j] = new Cell();
-            }
-        }
-
-        return new NextPieceVisualizer(canvas, rows, MAX_PIECE_WIDTH, cells, cell_size);
+        return new NextPieceVisualizer(canvas, rows, MAX_PIECE_WIDTH, cells, cell_size, padding_left, padding_up);
     }
 
     drawNextPiece(piece) {
@@ -29,7 +23,7 @@ class NextPieceVisualizer {
 
         pieceCopy.spawnInNextPieceVisualizer({ x: Math.floor(this.#columns / 2), y: Math.floor(this.#rows / 2) }, this.#cells);
 
-        GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
+        GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size, this.padding_left, this.padding_up);
     }
 
     clear() {
@@ -40,11 +34,13 @@ class NextPieceVisualizer {
         }
     }
 
-    constructor(canvas, rows, columns, cells, cell_size) {
+    constructor(canvas, rows, columns, cells, cell_size, padding_left, padding_up) {
         this.#canvas = canvas;
         this.#cell_size = cell_size;
         this.#cells = cells;
         this.#columns = columns;
         this.#rows = rows;
+        this.padding_left = padding_left;
+        this.padding_up = padding_up;        
     }
 }

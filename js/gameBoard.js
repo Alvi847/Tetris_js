@@ -7,6 +7,9 @@ class GameBoard {
 
     #cells;
 
+    padding_left;
+    padding_up;
+
     draw_timer;
 
     seed;
@@ -22,19 +25,12 @@ class GameBoard {
     lines;
     
     static createBoard(canvas, next_piece_visualizer) {
+        const {rows, cells, cell_size, padding_left, padding_up} = Utils.initBoardValues(canvas.width, canvas.height, COLUMNS);
 
-        const cell_size = Math.floor(canvas.width / COLUMNS);
-        const rows = Math.floor(canvas.height / cell_size);
+         const ctx = canvas.getContext("2d");
+        GameBoard.drawGrid(ctx, COLUMNS, rows, cell_size, padding_left, padding_up);
 
-        const cells = [];
-        for (let i = 0; i < COLUMNS; i++) {
-            cells[i] = [];
-            for (let j = 0; j < rows; j++) {
-                cells[i][j] = new Cell();
-            }
-        }
-
-        return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer);
+        return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up);
     }
 
     loadPieces() {
@@ -84,22 +80,36 @@ class GameBoard {
             }
         }
         // Se dibuja el tablero
-        GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
+        GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size, this.padding_left, this.padding_up);
     }
 
-    static draw(canvas, columns, rows, cells, cell_size) {
+    static draw(canvas, columns, rows, cells, cell_size, padding_left, padding_up) {
         if (canvas.getContext) {
             const ctx = canvas.getContext("2d");
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height) // 0, 0???
+            ctx.clearRect(0, 0, canvas.width, canvas.height) // Se borra todo el tablero
+
+            //GameBoard.drawGrid(ctx, columns, rows, cell_size, padding_left, padding_up);
 
             for (let i = 0; i < columns; i++) {
                 for (let j = 0; j < rows; j++) {
-                    if (cells[i][j].isPiece())
-                        cells[i][j].draw(ctx, i * cell_size, j * cell_size, cell_size);
+                    cells[i][j].draw(ctx, i * cell_size + padding_left, j * cell_size + padding_up, cell_size);
                 }
             }
         }
+    }
+
+    static drawGrid(ctx, columns, rows, cell_size, padding_left, padding_up){
+        ctx.fillStyle = RGBColor.buildRGB(GRID_COLOR);
+        for(let i = 0; i <= columns; i++){
+            ctx.fillRect(i * cell_size + padding_left, padding_up, 2, rows * cell_size);
+        }
+
+        for(let i = 0; i <= rows; i++){
+            ctx.fillRect(padding_left, i * cell_size + padding_up, columns * cell_size, 2);
+        }
+
+        ctx.fillStyle = '#000';
     }
 
     sideArrowKeyPressed(key) {
@@ -173,14 +183,14 @@ class GameBoard {
     }
 
     isMovementEnd(coords, piece) {
-        return this.isOut(coords) || this.#cells[coords.x][coords.y].isPiece(piece);
+        return this.isOut(coords) || this.#cells[coords.x][coords.y].isOtherPiece(piece);
     }
 
     isOut(coords) {
         return coords.y > this.#rows - 1 || coords.x < 0 || coords.x > this.#columns - 1;
     }
 
-    constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer) {
+    constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer, padding_left, padding_up) {
         this.#canvas = canvas;
         this.#rows = rows;
         this.#columns = columns;
@@ -188,6 +198,8 @@ class GameBoard {
         this.#cell_size = cell_size;
         this.lines = 0;
         this.#next_piece_visualizer = next_piece_visualizer;
+        this.padding_left = padding_left;
+        this.padding_up = padding_up;
     }
 
     /*get columns(){

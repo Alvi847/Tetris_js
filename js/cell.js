@@ -23,15 +23,24 @@ class Cell {
         return this.#piece;
     }
 
-    isPiece(piece) {
+    isOtherPiece(piece) {
         if (!this.#piece)
             return false;
         return this.#piece != piece;
     }
 
+    isPiece(){
+        return this.#piece != null
+    }
+
     draw(ctx, x, y, size) {
-        ctx.fillStyle = RGBColor.buildRGB(this.#piece.color);
-        ctx.fillRect(x, y, size, size);
+        if(this.#piece){
+            ctx.fillStyle = RGBColor.buildRGB(RGBColor.correctValues(RGBColor.addRGB(this.#piece.color, PIECE_BORDER_COLOR)));
+            ctx.fillRect(x, y, size, size);
+            
+            ctx.fillStyle = RGBColor.buildRGB(this.#piece.color);
+            ctx.fillRect(x + INNER_SQUARE_SIZE, y + INNER_SQUARE_SIZE, size - 2 * INNER_SQUARE_SIZE, size - 2 * INNER_SQUARE_SIZE);
+        }
     }
 
     static addCoords(...args) {

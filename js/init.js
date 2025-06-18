@@ -5,6 +5,14 @@ const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;
 const MAX_PIECE_HEIGHT = 5;
 
+const INNER_SQUARE_SIZE = 5;
+const PIECE_BORDER_COLOR = {r: -50, g: -50, b: -50};
+
+const GRID_COLOR = {r: 47, g: 47, b: 51};
+const GUI_BACKGROUND_COLOR = {r: 13, g: 13, b: 53}; 
+
+const CELL_SIZE_REDUCTION = 1;
+
 const GUI_ELEMENTS_CLASSES = '.tablero, .text-info-rect';
 
 let game_board;
@@ -33,7 +41,6 @@ function startGame(e) {
     const button = e.target;
     const gui_elements = document.querySelectorAll(GUI_ELEMENTS_CLASSES); 
     const canvas = document.getElementById('canvas');
-    const div = document.querySelector('div.tablero');
 
     canvas.width = 500;
     canvas.height = 900;
@@ -47,6 +54,7 @@ function startGame(e) {
 
     for(let i = 0; i < gui_elements.length; i++){
         gui_elements.item(i).style.display = 'flex';
+        gui_elements.item(i).style.backgroundColor = RGBColor.buildRGB(RGBColor.createColorObject(GUI_BACKGROUND_COLOR.r, GUI_BACKGROUND_COLOR.g, GUI_BACKGROUND_COLOR.b));
     }
 
     const npv = NextPieceVisualizer.createNextPieceVisualizer(next_piece_canvas);
