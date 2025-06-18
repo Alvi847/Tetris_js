@@ -27,9 +27,6 @@ class GameBoard {
     static createBoard(canvas, next_piece_visualizer) {
         const {rows, cells, cell_size, padding_left, padding_up} = Utils.initBoardValues(canvas.width, canvas.height, COLUMNS);
 
-         const ctx = canvas.getContext("2d");
-        GameBoard.drawGrid(ctx, COLUMNS, rows, cell_size, padding_left, padding_up);
-
         return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up);
     }
 
@@ -89,7 +86,7 @@ class GameBoard {
 
             ctx.clearRect(0, 0, canvas.width, canvas.height) // Se borra todo el tablero
 
-            //GameBoard.drawGrid(ctx, columns, rows, cell_size, padding_left, padding_up);
+            GameBoard.drawGrid(ctx, columns, rows, cell_size, padding_left, padding_up);
 
             for (let i = 0; i < columns; i++) {
                 for (let j = 0; j < rows; j++) {
