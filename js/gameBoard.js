@@ -36,12 +36,10 @@ class GameBoard {
 
     loadPieces() {
         this.pieces = Piece.loadPieces(Math.floor(this.#columns / 2));
-        //this.falling_piece = this.pickRandomPiece();
     }
 
     pickRandomPiece() {
         const index = Math.floor(Math.random() * this.pieces.length);
-        //return Piece.copy(this.pieces[index]);
         return new Piece(this.pieces[index].name, this.pieces[index].color, this.pieces[index].shape, this.pieces[index].center, this.pieces[index].rotatable);
     }
 
