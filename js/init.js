@@ -19,6 +19,13 @@ const PIECE_PROJECTION_ALPHA = 0.1;
 
 const GUI_ELEMENTS_CLASSES = '.tablero, .text-info-rect';
 
+
+const DEBUG_MODE = true; //Activate debug mode
+
+// Debug Constants
+const DEBUG_INSPECTED_CELL_COLOR = {r: 255, g: 255, b: 255, a: 1};
+const DEBUG_RED_CROSS_COLOR = {r: 255, g: 0, b: 0, a: 1};
+
 let game_board;
 
 function init() {
@@ -69,6 +76,9 @@ function startGame(e) {
     const npv = NextPieceVisualizer.createNextPieceVisualizer(next_piece_canvas);
 
     game_board = GameBoard.createBoard(canvas, npv, points_manager);
+
+    if(DEBUG_MODE)
+        game_board.setDebugManager();
 
     game_board.loadPieces();
 

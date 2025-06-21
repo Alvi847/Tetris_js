@@ -36,13 +36,17 @@ class Cell {
         return this.#piece != null
     }
 
-    draw(ctx, x, y, size) {
-        if (this.#piece) {
-            this.paintBlocksWithColor(ctx, x, y, size, this.#piece.color, PIECE_BORDER_COLOR);
+    draw(ctx, x, y, size, debug_color = null) {
+        if (!debug_color) {
+            if (this.#piece) {
+                this.paintBlocksWithColor(ctx, x, y, size, this.#piece.color, PIECE_BORDER_COLOR);
+            }
+            else if (this.is_projection) {
+                this.paintBlocksWithColor(ctx, x, y, size, this.projection_color, new RGBColor(PIECE_BORDER_COLOR.r, PIECE_BORDER_COLOR.g, PIECE_BORDER_COLOR.b, this.projection_color.a));
+            }
         }
-        else if (this.is_projection) {
-            this.paintBlocksWithColor(ctx, x, y, size, this.projection_color, new RGBColor(PIECE_BORDER_COLOR.r, PIECE_BORDER_COLOR.g, PIECE_BORDER_COLOR.b, this.projection_color.a));
-        }
+        else
+            this.paintBlocksWithColor(ctx, x, y, size, debug_color, { r: 0, g: 0, b: 0, a: 0 });
     }
 
     paintBlocksWithColor(ctx, x, y, size, color, border_color) {
@@ -71,8 +75,8 @@ class Cell {
         }), { x: 0, y: 0 });
     }
 
-    static rotateCoords(coords, direction){ // Derecha 90º => direction = 1, izquierda 90º => direction = -1
-        return {x: -direction * coords.y, y: direction * coords.x};
+    static rotateCoords(coords, direction) { // Derecha 90º => direction = 1, izquierda 90º => direction = -1
+        return { x: -direction * coords.y, y: direction * coords.x };
 
     }
 }

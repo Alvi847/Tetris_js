@@ -28,10 +28,16 @@ class GameBoard {
 
     piece_projection_cells;
 
+    debug;
+
     static createBoard(canvas, next_piece_visualizer, points_manager) {
         const { rows, cells, cell_size, padding_left, padding_up } = Utils.initBoardValues(canvas.width, canvas.height, COLUMNS);
 
         return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up, points_manager);
+    }
+
+    setDebugManager(){
+        this.debug = new DebugManager(this, COLUMNS, this.#rows, this.#canvas, this.#next_piece_visualizer, this.#cell_size, this.#cells)
     }
 
     loadPieces() {
@@ -125,7 +131,7 @@ class GameBoard {
     updatePieceProjection() {
         this.stopProjection();
         const final_position = this.calculateFinalPosition();
-        if(final_position != {x: 0, y:0}){
+        if (final_position != { x: 0, y: 0 }) {
             this.piece_projection_cells = this.falling_piece.cellsForPosition(final_position);
             this.showProjection();
         }
@@ -154,10 +160,10 @@ class GameBoard {
         }
     }
 
-    upArrowKeyPressed(){
-        if(this.falling_piece.rotateIfAble(this, 1))
+    upArrowKeyPressed() {
+        if (this.falling_piece.rotateIfAble(this, 1))
             this.updatePieceProjection();
-        
+
     }
 
     downArrowKeyPressed() {
@@ -202,8 +208,16 @@ class GameBoard {
             let is_line = true;
             let i = 0;
             while (i < this.#columns && is_line) {
-                if (!this.#cells[i][piece_lines[j]].isPiece())
+
+                this.debugDraw({ type: 'CELL_INSPECTION', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]])
+
+                if (!this.#cells[i][piece_lines[j]].isPiece()) {
                     is_line = false;
+                    this.debugDraw({ type: 'NO_LINE_CELL', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]])
+                }
+                else
+                    this.debugDraw({ type: 'DEFAULT_DRAW', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]]);
+
                 i++;
             }
             if (is_line == true) {
@@ -220,6 +234,11 @@ class GameBoard {
             this.processNewLines(lines, upper_line);
         }
         return lines;
+    }
+
+    debugDraw(operationObj, ...cells) {
+        if (this.debug)
+            this.debug.debugDraw(operationObj, ...cells);
     }
 
     processNewLines(lines, upper_line) {
@@ -268,5 +287,6 @@ class GameBoard {
         this.padding_up = padding_up;
         this.points_manager = points_manager;
         this.piece_projection_cells = [];
+        this.debug = null;
     }
 }

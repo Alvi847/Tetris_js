@@ -267,7 +267,7 @@ class Piece {
                 piece_lines.push(this.#center.y + block.y);
         }
         if (!piece_lines.find((e) => {
-            return e.y == this.#center.y;
+            return e === this.#center.y;
         }))
             piece_lines.push(this.#center.y);
         return piece_lines;
