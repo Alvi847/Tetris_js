@@ -50,7 +50,7 @@ class GameBoard {
         const total_weight = (() => {
             let weight_sum = 0;
             for (const piece_data of this.pieces) {
-                weight_sum += piece_data.weight;
+                weight_sum += Number(piece_data.weight);
             }
             return weight_sum;
         })();
@@ -60,7 +60,7 @@ class GameBoard {
         let accumulator = 0
 
         for (const {piece, weight} of this.pieces) {
-            accumulator += weight
+            accumulator += Number(weight);
 
             if (rand < accumulator) {
                 return Piece.copy(piece);
