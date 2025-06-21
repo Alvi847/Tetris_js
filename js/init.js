@@ -20,7 +20,7 @@ const PIECE_PROJECTION_ALPHA = 0.1;
 const GUI_ELEMENTS_CLASSES = '.tablero, .text-info-rect';
 
 
-const DEBUG_MODE = true; //Activate debug mode
+const DEBUG_MODE = false; //Activate debug mode
 
 // Debug Constants
 const DEBUG_INSPECTED_CELL_COLOR = {r: 255, g: 255, b: 255, a: 1};

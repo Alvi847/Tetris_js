@@ -263,7 +263,8 @@ class Piece {
         const piece_lines = [];
         for (let i = this.#shape.length - 1; i >= 0; i--) {
             const block = this.#shape[i];
-            if (piece_lines.length == 0 || piece_lines[piece_lines.length - 1] > this.#center.y + block.y)
+            //if (piece_lines.length == 0 || piece_lines[piece_lines.length - 1] > this.#center.y + block.y)
+            if(!piece_lines.find((e) => {return e === this.#center.y + block.y}))
                 piece_lines.push(this.#center.y + block.y);
         }
         if (!piece_lines.find((e) => {
