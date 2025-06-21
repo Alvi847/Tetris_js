@@ -6,14 +6,17 @@ class RGBColor {
 
     b;
 
-    constructor(r, g, b) {
+    a;
+
+    constructor(r, g, b, a = 1) {
         this.r = r;
         this.g = g;
         this.b = b;
+        this.a = a;
     }
 
     static buildRGB(color){
-        return `rgb(${color.r}, ${color.g}, ${color.b})`;
+        return `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})`;
     }
 
     static addRGB(...args){
@@ -24,16 +27,21 @@ class RGBColor {
         }), { r: 0, g: 0 , b: 0});
     }
 
-    static createColorObject(r, g, b){
-        if(Number.isInteger(r) && Number.isInteger(g) && Number.isInteger(b)){
-            if(r < 256 && r >= 0, g < 256 && g >= 0, b < 256 && b >= 0){
-                return new RGBColor(r, g, b);
+    static addRGBA(a, ...args){
+        const rgb_sum = RGBColor.addRGB(...args);
+        return {r: rgb_sum.r, g: rgb_sum.g, b: rgb_sum.b, a: a};
+    }
+
+    static createColorObject(r, g, b, a = 1){
+        if(Number.isInteger(r) && Number.isInteger(g) && Number.isInteger(b) && Number.isFinite(a)){
+            if(r < 256 && r >= 0, g < 256 && g >= 0, b < 256 && b >= 0 && a >= 0 && a <= 1){
+                return new RGBColor(r, g, b, a);
             }
             else
-                throw Error(`Invalid color format, values must be between 0 and 255 (${r}, ${g}, ${b})`);
+                throw Error(`Invalid color format, RGB values must be between 0 and 255 with an alpha channel between 0 and 1 (${r}, ${g}, ${b}, ${a})`);
         }
         else
-            throw Error(`Invalid color format, values must be integer numbers (${r}, ${g}, ${b})`);
+            throw Error(`Invalid color format, RGB values must be integer numbers and alpha channel must be a decimal number (${r}, ${g}, ${b}, ${a})`);
     }
 
     static correctValues(color){
@@ -52,6 +60,15 @@ class RGBColor {
         else if(color.b > 255)
             color.b = 255;
 
-        return new RGBColor(color.r, color.g, color.b);
+        if(color.a < 0)
+            color.a = 0
+        else if(color.a > 1)
+            color.a = 1;
+
+        return new RGBColor(color.r, color.g, color.b, color.a);
+    }
+
+    setAlpha(alpha){
+        this.a = alpha; 
     }
 }

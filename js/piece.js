@@ -186,11 +186,15 @@ class Piece {
     checkCollisions(game_board, direction) {
         let i = 0;
         while (i < this.#shape.length && !game_board.isMovementEnd(Cell.addCoords(this.#center, direction, this.#shape[i]), this)) i++;
-        return i == this.#shape.length;
+        if(i == this.#shape.length){
+            return !game_board.isMovementEnd(Cell.addCoords(this.#center, direction), this)
+        }
+        else
+            return false;
     }
 
-    moveToCoords(newCoords){
-        this.#center = newCoords;
+    moveToCoords(new_coords){
+        this.#center = new_coords;
     }
 
     movementEnd(){
@@ -224,8 +228,18 @@ class Piece {
 
         for (let i = this.#shape.length - 1; i >= 0; i--) {
             const block = this.#shape[i];
-            const block_coords = Cell.addCoords(Cell.addCoords(this.#center, block));
+            const block_coords = Cell.addCoords(this.#center, block);
             cells[block_coords.x][block_coords.y].piece = this;
         }
+    }
+
+    cellsForPosition(position){
+        const cells = [];
+        for (let i = this.#shape.length - 1; i >= 0; i--) {
+            const block = this.#shape[i];
+            cells.push(Cell.addCoords(position, this.#center, block));
+        }
+        cells.push(Cell.addCoords(position, this.#center));
+        return cells;
     }
 }

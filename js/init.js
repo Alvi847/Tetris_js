@@ -1,17 +1,21 @@
 ; document.addEventListener("DOMContentLoaded", init);
 
-const DELTA_TIME = 500;
+const DELTA_TIME = 100;
+const INITIAL_PIECE_FALL_FACTOR = 10;
+
 const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;
 const MAX_PIECE_HEIGHT = 5;
 
 const INNER_SQUARE_SIZE = 5;
-const PIECE_BORDER_COLOR = {r: -50, g: -50, b: -50};
+const PIECE_BORDER_COLOR = {r: -50, g: -50, b: -50, a: 1};
 
-const GRID_COLOR = {r: 47, g: 47, b: 51};
-const GUI_BACKGROUND_COLOR = {r: 13, g: 13, b: 53}; 
+const GRID_COLOR = {r: 47, g: 47, b: 51, a: 1};
+const GUI_BACKGROUND_COLOR = {r: 13, g: 13, b: 53, a: 1}; 
 
 const CELL_SIZE_REDUCTION = 1;
+
+const PIECE_PROJECTION_ALPHA = 0.1;
 
 const GUI_ELEMENTS_CLASSES = '.tablero, .text-info-rect';
 

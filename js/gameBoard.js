@@ -26,6 +26,8 @@ class GameBoard {
 
     points_manager;
 
+    piece_projection_cells;
+
     static createBoard(canvas, next_piece_visualizer, points_manager) {
         const { rows, cells, cell_size, padding_left, padding_up } = Utils.initBoardValues(canvas.width, canvas.height, COLUMNS);
 
@@ -34,7 +36,7 @@ class GameBoard {
 
     loadPieces() {
         this.pieces = Piece.loadPieces(Math.floor(this.#columns / 2));
-        this.falling_piece = this.pickRandomPiece();
+        //this.falling_piece = this.pickRandomPiece();
     }
 
     pickRandomPiece() {
@@ -58,8 +60,10 @@ class GameBoard {
     gameLoop() {
         // Se elige la siguiente pieza
         if (!this.next_piece) {
-            this.next_piece = this.pickRandomPiece();
-            this.#next_piece_visualizer.drawNextPiece(this.next_piece);
+            this.pickNextPiece();
+        }
+        if (!this.falling_piece) {
+            this.spawnFallingPiece();
         }
         if (this.can_fall_piece) {
             this.can_fall_piece = false;
@@ -71,12 +75,6 @@ class GameBoard {
             if (!this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
                 // La pieza ha llegado hasta abajo, se cambia a la siguiente pieza y se calculan lineas
                 this.processMovementEnd();
-                this.falling_piece = this.next_piece;
-                this.next_piece = null;
-                this.checkForLines();
-                if (!this.canSpawnPiece()) {
-                    this.gameOver();
-                }
             }
         }
         // Se dibuja el tablero
@@ -112,25 +110,67 @@ class GameBoard {
         ctx.fillStyle = '#000';
     }
 
+    spawnFallingPiece() {
+        this.falling_piece = this.next_piece;
+        if (!this.canSpawnPiece()) {
+            return this.gameOver();
+        }
+        this.pickNextPiece();
+        this.updatePieceProjection();
+    }
+
+    pickNextPiece() {
+        this.next_piece = this.pickRandomPiece();
+        this.#next_piece_visualizer.drawNextPiece(this.next_piece);
+    }
+
+    updatePieceProjection() {
+        this.stopProjection();
+        const final_position = this.calculateFinalPosition();
+        this.piece_projection_cells = this.falling_piece.cellsForPosition(final_position);
+        this.showProjection();
+    }
+
+    showProjection() {
+        for (const position of this.piece_projection_cells) {
+            this.#cells[position.x][position.y].setProjection(this.falling_piece.color);
+        }
+    }
+
+    stopProjection() {
+        for (const position of this.piece_projection_cells) {
+            this.#cells[position.x][position.y].removeProjection();
+        }
+    }
+
     sideArrowKeyPressed(key) {
         const direction = { x: key, y: 0 };
         if (this.falling_piece.moveLateralIfAble(this, direction)) {
             if (!this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
-                this.falling_piece = this.next_piece;
-                this.next_piece = null;
+                this.processMovementEnd();
             }
-            GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size, this.padding_left, this.padding_up);
+            else
+                this.updatePieceProjection();
         }
     }
 
     downArrowKeyPressed() {
         if (this.next_piece != null) {
-            while (this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
-                this.falling_piece.move(this, { x: 0, y: 1 });
-            }
+
+            const final_position = this.calculateFinalPosition();
+            this.falling_piece.move(this, final_position);
 
             this.processMovementEnd();
         }
+    }
+
+    calculateFinalPosition() {
+        let i = 0;
+        while (this.falling_piece.checkCollisions(this, { x: 0, y: i })) { i++; }
+        if (i == 0)
+            return { x: 0, y: 0 };
+        else
+            return { x: 0, y: i - 1 };
     }
 
     processMovementEnd() {
@@ -140,16 +180,12 @@ class GameBoard {
             this.lines += newLines;
             this.points_manager.updateLinesCounter(this.lines);
         }
-        this.falling_piece = this.next_piece;
-        this.next_piece = null;
-        if (!this.canSpawnPiece()) {
-            this.gameOver();
-        }
+        this.spawnFallingPiece();
     }
 
     setTimers() {
         this.draw_timer = setInterval(() => this.gameLoop(), DELTA_TIME);
-        this.can_fall_piece = setInterval(() => { this.can_fall_piece = true }, DELTA_TIME * 2);
+        this.can_fall_piece = setInterval(() => { this.can_fall_piece = true }, DELTA_TIME * INITIAL_PIECE_FALL_FACTOR);
     }
 
     checkForLines() {
@@ -225,5 +261,6 @@ class GameBoard {
         this.padding_left = padding_left;
         this.padding_up = padding_up;
         this.points_manager = points_manager;
+        this.piece_projection_cells = [];
     }
 }
