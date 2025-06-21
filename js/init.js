@@ -38,6 +38,9 @@ function init() {
         else if (e.key == 'ArrowDown') {
             game_board.downArrowKeyPressed();
         }
+        else if (e.key == 'ArrowUp') {
+            game_board.upArrowKeyPressed();
+        }
     });
 }
 

@@ -44,6 +44,17 @@ class Piece {
             ]
         },
         {
+            "name": 'Light Orange Long Line',
+            "color": ['255', '140', '64'],
+            "shape": [
+                ['X'],
+                ['X'],
+                ['C'],
+                ['X'],
+                ['X']
+            ]
+        },
+        {
             "name": 'Purple Camila',
             "color": ['96', '54', '168'],
             "shape": [
@@ -154,6 +165,16 @@ class Piece {
         }
     }
 
+    static copy(piece){
+        const shape_copy = [];
+
+        for(const block of piece.shape){
+            shape_copy.push(block);
+        }
+
+        return new Piece(piece.name, piece.color, shape_copy, piece.center, piece.rotatable);
+    }
+
     toJSON() {
         return {
             shape: this.#shape,
@@ -183,45 +204,76 @@ class Piece {
         return false;
     }
 
+    rotateIfAble(game_board, direction) {
+        if (this.rotatable) {
+            let can_rotate = true;
+            const new_coords = [];
+            let i = this.#shape.length - 1
+            while (i >= 0) {
+                const block = this.#shape[i];
+
+                const rotated_coords = Cell.rotateCoords(block, direction);
+
+                if (game_board.isMovementEnd(Cell.addCoords(this.#center, rotated_coords)))
+                    can_rotate = false;
+                else{
+                    new_coords.push(rotated_coords);
+                }
+                i--;
+            }
+            if (can_rotate) {
+                for (let j = this.#shape.length - 1; j >= 0; j--) {
+                    const block = this.#shape[j];
+                    game_board.leaveCell(Cell.addCoords(this.#center, block));
+                    game_board.occupyCell(Cell.addCoords(this.#center, new_coords[j]), this);
+                    this.#shape[j] = new_coords[j];
+                }
+            }
+            return can_rotate;
+        }
+        else
+            return false;
+    }
+
     checkCollisions(game_board, direction) {
         let i = 0;
         while (i < this.#shape.length && !game_board.isMovementEnd(Cell.addCoords(this.#center, direction, this.#shape[i]), this)) i++;
-        if(i == this.#shape.length){
+        if (i == this.#shape.length) {
             return !game_board.isMovementEnd(Cell.addCoords(this.#center, direction), this)
         }
         else
             return false;
     }
 
-    moveToCoords(new_coords){
+    moveToCoords(new_coords) {
         this.#center = new_coords;
     }
 
-    movementEnd(){
-       for (let i = this.#shape.length - 1; i >= 0; i--) {
+    movementEnd() {
+        for (let i = this.#shape.length - 1; i >= 0; i--) {
             const block = this.#shape[i];
             game_board.leaveCell(Cell.addCoords(this.#center, block));
-            game_board.occupyCell(Cell.addCoords(this.#center, block), {color: this.color, name: this.#name});
-        } 
+            game_board.occupyCell(Cell.addCoords(this.#center, block), { color: this.color, name: this.#name });
+        }
         game_board.leaveCell(this.#center);
-        game_board.occupyCell(this.#center, {color: this.color, name: this.#name});
+        game_board.occupyCell(this.#center, { color: this.color, name: this.#name });
     }
 
-    getLines(){
+    getLines() {
         const piece_lines = [];
         for (let i = this.#shape.length - 1; i >= 0; i--) {
             const block = this.#shape[i];
-            if(piece_lines.length == 0 || piece_lines[piece_lines.length - 1] > this.#center.y + block.y)
+            if (piece_lines.length == 0 || piece_lines[piece_lines.length - 1] > this.#center.y + block.y)
                 piece_lines.push(this.#center.y + block.y);
-        } 
-        if(!piece_lines.find((e) => {
+        }
+        if (!piece_lines.find((e) => {
             return e.y == this.#center.y;
         }))
             piece_lines.push(this.#center.y);
         return piece_lines;
     }
 
-    spawnInNextPieceVisualizer(center, cells){
+    spawnInNextPieceVisualizer(center, cells) {
         this.#center = center;
 
         cells[center.x][center.y].piece = this;
@@ -233,7 +285,7 @@ class Piece {
         }
     }
 
-    cellsForPosition(position){
+    cellsForPosition(position) {
         const cells = [];
         for (let i = this.#shape.length - 1; i >= 0; i--) {
             const block = this.#shape[i];

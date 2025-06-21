@@ -70,4 +70,9 @@ class Cell {
             y: accum.y + current_value.y,
         }), { x: 0, y: 0 });
     }
+
+    static rotateCoords(coords, direction){ // Derecha 90º => direction = 1, izquierda 90º => direction = -1
+        return {x: -direction * coords.y, y: direction * coords.x};
+
+    }
 }

@@ -40,7 +40,7 @@ class GameBoard {
 
     pickRandomPiece() {
         const index = Math.floor(Math.random() * this.pieces.length);
-        return new Piece(this.pieces[index].name, this.pieces[index].color, this.pieces[index].shape, this.pieces[index].center, this.pieces[index].rotatable);
+        return Piece.copy(this.pieces[index]);
     }
 
     canSpawnPiece() {
@@ -125,8 +125,10 @@ class GameBoard {
     updatePieceProjection() {
         this.stopProjection();
         const final_position = this.calculateFinalPosition();
-        this.piece_projection_cells = this.falling_piece.cellsForPosition(final_position);
-        this.showProjection();
+        if(final_position != {x: 0, y:0}){
+            this.piece_projection_cells = this.falling_piece.cellsForPosition(final_position);
+            this.showProjection();
+        }
     }
 
     showProjection() {
@@ -150,6 +152,12 @@ class GameBoard {
             else
                 this.updatePieceProjection();
         }
+    }
+
+    upArrowKeyPressed(){
+        if(this.falling_piece.rotateIfAble(this, 1))
+            this.updatePieceProjection();
+        
     }
 
     downArrowKeyPressed() {
@@ -245,7 +253,7 @@ class GameBoard {
     }
 
     isOut(coords) {
-        return coords.y > this.#rows - 1 || coords.x < 0 || coords.x > this.#columns - 1;
+        return coords.y < 0 || coords.y > this.#rows - 1 || coords.x < 0 || coords.x > this.#columns - 1;
     }
 
     constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer, padding_left, padding_up, points_manager) {
