@@ -125,10 +125,10 @@ class Piece {
             y = 0;
             for (const singleCell of cells) {
                 if (singleCell === 'X') {
-                    blocks.push({ x, y });
+                    blocks.push({ x: y, y: x });
                 }
                 else if (singleCell === 'C') {
-                    center = { x, y };
+                    center = { x: y, y: x };
                 }
                 else
                     return null;
@@ -191,6 +191,30 @@ class Piece {
 
     moveToCoords(newCoords){
         this.#center = newCoords;
+    }
+
+    movementEnd(){
+       for (let i = this.#shape.length - 1; i >= 0; i--) {
+            const block = this.#shape[i];
+            game_board.leaveCell(Cell.addCoords(this.#center, block));
+            game_board.occupyCell(Cell.addCoords(this.#center, block), {color: this.color, name: this.#name});
+        } 
+        game_board.leaveCell(this.#center);
+        game_board.occupyCell(this.#center, {color: this.color, name: this.#name});
+    }
+
+    getLines(){
+        const piece_lines = [];
+        for (let i = this.#shape.length - 1; i >= 0; i--) {
+            const block = this.#shape[i];
+            if(piece_lines.length == 0 || piece_lines[piece_lines.length - 1] > this.#center.y + block.y)
+                piece_lines.push(this.#center.y + block.y);
+        } 
+        if(!piece_lines.find((e) => {
+            return e.y == this.#center.y;
+        }))
+            piece_lines.push(this.#center.y);
+        return piece_lines;
     }
 
     spawnInNextPieceVisualizer(center, cells){

@@ -57,12 +57,22 @@ function startGame(e) {
         gui_elements.item(i).style.backgroundColor = RGBColor.buildRGB(RGBColor.createColorObject(GUI_BACKGROUND_COLOR.r, GUI_BACKGROUND_COLOR.g, GUI_BACKGROUND_COLOR.b));
     }
 
+    const points_manager = getPointsGUI();
+
     const npv = NextPieceVisualizer.createNextPieceVisualizer(next_piece_canvas);
 
-    game_board = GameBoard.createBoard(canvas, npv);
+    game_board = GameBoard.createBoard(canvas, npv, points_manager);
 
     game_board.loadPieces();
 
     game_board.setTimers();
 
+}
+
+function getPointsGUI(){
+    const lines = document.querySelector('.text-info-rect > [name="lines"]');
+    const level = document.querySelector('.text-info-rect > [name="level"]');
+    const points = document.querySelector('.text-info-rect > [name="points"]');
+
+    return new Points(points, level, lines);
 }

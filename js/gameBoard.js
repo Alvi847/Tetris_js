@@ -23,11 +23,13 @@ class GameBoard {
     can_fall_piece;
 
     lines;
-    
-    static createBoard(canvas, next_piece_visualizer) {
-        const {rows, cells, cell_size, padding_left, padding_up} = Utils.initBoardValues(canvas.width, canvas.height, COLUMNS);
 
-        return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up);
+    points_manager;
+
+    static createBoard(canvas, next_piece_visualizer, points_manager) {
+        const { rows, cells, cell_size, padding_left, padding_up } = Utils.initBoardValues(canvas.width, canvas.height, COLUMNS);
+
+        return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up, points_manager);
     }
 
     loadPieces() {
@@ -41,15 +43,15 @@ class GameBoard {
         return new Piece(this.pieces[index].name, this.pieces[index].color, this.pieces[index].shape, this.pieces[index].center, this.pieces[index].rotatable);
     }
 
-    canSpawnPiece(){
+    canSpawnPiece() {
         return this.falling_piece.checkCollisions(this, { x: 0, y: 1 });
     }
 
-    gameOver(){
+    gameOver() {
         // Hacemos que el bucle de juego no se ejecute más 
         clearInterval(this.draw_timer);
 
-        document.getElementById('game_over_rect').style.display = 'flex'; 
+        document.getElementById('game_over_rect').style.display = 'flex';
 
     }
 
@@ -68,10 +70,11 @@ class GameBoard {
             // Se calculan colisiones
             if (!this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
                 // La pieza ha llegado hasta abajo, se cambia a la siguiente pieza y se calculan lineas
+                this.processMovementEnd();
                 this.falling_piece = this.next_piece;
                 this.next_piece = null;
                 this.checkForLines();
-                if(!this.canSpawnPiece()){
+                if (!this.canSpawnPiece()) {
                     this.gameOver();
                 }
             }
@@ -96,13 +99,13 @@ class GameBoard {
         }
     }
 
-    static drawGrid(ctx, columns, rows, cell_size, padding_left, padding_up){
+    static drawGrid(ctx, columns, rows, cell_size, padding_left, padding_up) {
         ctx.fillStyle = RGBColor.buildRGB(GRID_COLOR);
-        for(let i = 0; i <= columns; i++){
+        for (let i = 0; i <= columns; i++) {
             ctx.fillRect(i * cell_size + padding_left, padding_up, 2, rows * cell_size);
         }
 
-        for(let i = 0; i <= rows; i++){
+        for (let i = 0; i <= rows; i++) {
             ctx.fillRect(padding_left, i * cell_size + padding_up, columns * cell_size, 2);
         }
 
@@ -116,17 +119,32 @@ class GameBoard {
                 this.falling_piece = this.next_piece;
                 this.next_piece = null;
             }
+            GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size, this.padding_left, this.padding_up);
         }
     }
 
     downArrowKeyPressed() {
-        while (this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
-            this.falling_piece.move(this, { x: 0, y: 1 });
-        }
+        if (this.next_piece != null) {
+            while (this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
+                this.falling_piece.move(this, { x: 0, y: 1 });
+            }
 
+            this.processMovementEnd();
+        }
+    }
+
+    processMovementEnd() {
+        this.falling_piece.movementEnd();
+        const newLines = this.checkForLines();
+        if (newLines > 0) {
+            this.lines += newLines;
+            this.points_manager.updateLinesCounter(this.lines);
+        }
         this.falling_piece = this.next_piece;
         this.next_piece = null;
-        this.checkForLines();
+        if (!this.canSpawnPiece()) {
+            this.gameOver();
+        }
     }
 
     setTimers() {
@@ -136,34 +154,43 @@ class GameBoard {
 
     checkForLines() {
         let lines = 0;
-        for (let j = 0; j < this.#rows; j++) {
-            let isLine = true;
-            for (let i = 0; i < this.#columns; i++) {
-                if (!this.#cells[i][j].isPiece())
-                    isLine = false;
+        let upper_line = null;
+        const piece_lines = this.falling_piece.getLines();
+        for (let j = 0; j < piece_lines.length; j++) {
+            let is_line = true;
+            let i = 0;
+            while (i < this.#columns && is_line) {
+                if (!this.#cells[i][piece_lines[j]].isPiece())
+                    is_line = false;
+                i++;
             }
-            if (isLine == true) {
+            if (is_line == true) {
                 lines++;
+                if (upper_line == null)
+                    upper_line = piece_lines[j];
                 for (let i = 0; i < this.#columns; i++) {
-                    this.#cells[i][j].block_num = 0;
-                    this.#cells[i][j].piece = null;
+                    this.#cells[i][piece_lines[j]].block_num = 0;
+                    this.#cells[i][piece_lines[j]].piece = null;
                 }
             }
         }
         if (lines > 0) {
-            for (let j = this.#rows - 1 - lines; j > 0; j--) {
-                for (let i = 0; i < this.#columns; i++) {
-                    const piece = this.#cells[i][j].piece
-                    if (piece) {
-                        this.leaveCell({ x: i, y: j });
-                        this.occupyCell({ x: i, y: j + 1 }, piece);
-                    }
-                }
-            }
-            this.lines += lines
-            console.log("Líneas: ", this.lines);
+            this.processNewLines(lines, upper_line);
         }
         return lines;
+    }
+
+    processNewLines(lines, upper_line) {
+        for (let j = upper_line - 1; j > 0; j--) {
+            for (let i = 0; i < this.#columns; i++) {
+                const piece = this.#cells[i][j].piece
+                if (piece) {
+                    this.leaveCell({ x: i, y: j });
+                    this.occupyCell({ x: i, y: j + lines }, piece);
+                }
+            }
+        }
+        console.log("Lineas nuevas", lines);
     }
 
     leaveCell(coords) {
@@ -187,7 +214,7 @@ class GameBoard {
         return coords.y > this.#rows - 1 || coords.x < 0 || coords.x > this.#columns - 1;
     }
 
-    constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer, padding_left, padding_up) {
+    constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer, padding_left, padding_up, points_manager) {
         this.#canvas = canvas;
         this.#rows = rows;
         this.#columns = columns;
@@ -197,18 +224,6 @@ class GameBoard {
         this.#next_piece_visualizer = next_piece_visualizer;
         this.padding_left = padding_left;
         this.padding_up = padding_up;
+        this.points_manager = points_manager;
     }
-
-    /*get columns(){
-        return this.#columns;
-    }
-    get rows(){
-        return this.#rows;
-    }
-    get canvas(){
-        return this.#canvas;
-    }
-    get cells(){
-        return this.#cells;
-    }*/
 }
