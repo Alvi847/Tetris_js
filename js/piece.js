@@ -11,28 +11,31 @@ class Piece {
     #rotatable;
 
     static possible_pieces = [
-        /*{
+        {
             "name": 'Blue square',
             "color": ['0', '0', '255'],
             "shape": [
                 ['X', 'X'],
                 ['X', 'X']
-            ]
-        },*/
+            ],
+            "weight": '10'
+        },
         {
             "name": 'Red L',
             "color": ['255', '0', '0'],
             "shape": [
                 ['X'],
                 ['X', 'C', 'X']
-            ]
+            ],
+            "weight": '35'
         },
         {
             "name": 'Light Blue Line',
             "color": ['0', '150', '255'],
             "shape": [
                 ['X', 'C', 'X']
-            ]
+            ],
+            "weight": '10'
         },
         {
             "name": 'Light Green Line',
@@ -41,7 +44,8 @@ class Piece {
                 ['X'],
                 ['C'],
                 ['X']
-            ]
+            ],
+            "weight": '10'
         },
         {
             "name": 'Light Orange Long Line',
@@ -52,7 +56,8 @@ class Piece {
                 ['C'],
                 ['X'],
                 ['X']
-            ]
+            ],
+            "weight": '5'
         },
         {
             "name": 'Purple Camila',
@@ -60,7 +65,17 @@ class Piece {
             "shape": [
                 ['X', 'C', 'X'],
                 ['X']
-            ]
+            ],
+            "weight": '35'
+        },
+        {
+            "name": 'Prueba ZigZag',
+            "color": ['0', '255', '255'],
+            "shape": [
+                ['X', 'C', 'O'],
+                ['O', 'X', 'X']
+            ],
+            "weight": '20'
         },
     ]
 
@@ -90,41 +105,46 @@ class Piece {
     }
 
     static loadPieces(starting_x) {
-        const pieceArray = [];
+        const piece_array = [];
         for (let index = 0; index < this.possible_pieces.length; index++) {
-            const pieceData = this.possible_pieces[index];
-            const name = pieceData.name;
+            const piece_data = this.possible_pieces[index];
+            const name = piece_data.name;
             if (name == null)
                 throw Error("All pieces must have a name");
-            if (Array.isArray(pieceData.color) && pieceData.color.length === 3) {
-                const color = RGBColor.createColorObject(Number(pieceData.color[0]), Number(pieceData.color[1]), Number(pieceData.color[2]));
+            if (Array.isArray(piece_data.color) && piece_data.color.length === 3) {
+                const color = RGBColor.createColorObject(Number(piece_data.color[0]), Number(piece_data.color[1]), Number(piece_data.color[2]));
 
-                let shape = pieceData.shape;
+                let shape = piece_data.shape;
                 if (Array.isArray(shape)) {
                     shape = Piece.parseShape(shape, starting_x);
                     if (shape == null)
-                        throw Error("Invalid shape format for piece: %s", pieceData.name);
+                        throw Error("Invalid shape format for piece: %s", piece_data.name);
+                    let piece_weight = 1;
+                    if(!Number.isNaN(piece_data.weight) && piece_data.weight > 1)
+                        piece_weight = piece_data.weight;
+                    else
+                        console.log(`Piece weight for piece ${name} is not valid. It must be a number above 0!  Using default weight instead...`);
                     const newPiece = { name: name, color: color, shape: shape.blocks, center: shape.center, rotatable: shape.rotatable };
-                    pieceArray.push(newPiece);
+                    piece_array.push({piece: newPiece, weight: piece_weight});
                 }
                 else
-                    throw Error("Invalid shape format for piece: %s", pieceData.name);
+                    throw Error("Invalid shape format for piece: %s", piece_data.name);
 
             }
             else
-                throw Error("Invalid rgb color format for piece: %s", pieceData.name);
+                throw Error("Invalid rgb color format for piece: %s", piece_data.name);
         }
 
         const seen = new Set();
-        for (const obj of pieceArray) {
-            const name = obj.name;
+        for (const obj of piece_array) {
+            const name = obj.piece.name;
             if (seen.has(name)) {
                 throw Error("All piece names must be unique!");
             }
             seen.add(name);
         }
 
-        return pieceArray;
+        return piece_array;
     }
 
     static parseShape(shape, starting_x) {
@@ -141,7 +161,7 @@ class Piece {
                 else if (singleCell === 'C') {
                     center = { x: y, y: x };
                 }
-                else
+                else if (singleCell !== 'O')
                     return null;
                 y++;
             }
@@ -209,12 +229,12 @@ class Piece {
             let can_rotate = true;
             const new_coords = [];
             let i = this.#shape.length - 1
-            while (i >= 0) {
+            while (i >= 0 && can_rotate) {
                 const block = this.#shape[i];
 
                 const rotated_coords = Cell.rotateCoords(block, direction);
 
-                if (game_board.isMovementEnd(Cell.addCoords(this.#center, rotated_coords)))
+                if (game_board.isMovementEnd(Cell.addCoords(this.#center, rotated_coords), this))
                     can_rotate = false;
                 else{
                     new_coords.push(rotated_coords);

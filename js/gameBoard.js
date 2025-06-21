@@ -36,7 +36,7 @@ class GameBoard {
         return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up, points_manager);
     }
 
-    setDebugManager(){
+    setDebugManager() {
         this.debug = new DebugManager(this, COLUMNS, this.#rows, this.#canvas, this.#next_piece_visualizer, this.#cell_size, this.#cells)
     }
 
@@ -45,8 +45,30 @@ class GameBoard {
     }
 
     pickRandomPiece() {
-        const index = Math.floor(Math.random() * this.pieces.length);
-        return Piece.copy(this.pieces[index]);
+        //const index = Math.floor(Math.random() * this.pieces.length);
+
+        const total_weight = (() => {
+            let weight_sum = 0;
+            for (const piece_data of this.pieces) {
+                weight_sum += piece_data.weight;
+            }
+            return weight_sum;
+        })();
+
+        const rand = Math.floor(Math.random() * total_weight);
+
+        let accumulator = 0
+
+        for (const {piece, weight} of this.pieces) {
+            accumulator += weight
+
+            if (rand < accumulator) {
+                return Piece.copy(piece);
+            }
+        }
+
+        //console.log('pickRandomPiece falló');
+        //return Piece.copy(this.pieces[index]);
     }
 
     canSpawnPiece() {
@@ -56,7 +78,7 @@ class GameBoard {
     gameOver() {
         // Hacemos que el bucle de juego no se ejecute más 
         clearInterval(this.draw_timer);
-
+        GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size, this.padding_left, this.padding_up);
         document.getElementById('game_over_rect').style.display = 'flex';
 
     }
