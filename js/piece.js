@@ -18,7 +18,7 @@ class Piece {
                 ['X', 'X'],
                 ['X', 'X']
             ],
-            "weight": '10'
+            "weight": '100'
         },
         {
             "name": 'Red L',
@@ -69,13 +69,22 @@ class Piece {
             "weight": '35'
         },
         {
-            "name": 'Prueba ZigZag',
+            "name": 'Light blue ZigZag',
             "color": ['0', '255', '255'],
             "shape": [
                 ['X', 'C', 'O'],
                 ['O', 'X', 'X']
             ],
             "weight": '20'
+        },
+        {
+            "name": 'T',
+            "color": ['0', '255', '255'],
+            "shape": [
+                ['O', 'X', 'O'],
+                ['X', 'C', 'X']
+            ],
+            "weight": '10'
         },
     ]
 
@@ -177,9 +186,10 @@ class Piece {
             };
         }
         else {
+            center = {x: starting_x, y: blocks.shift().y};
             return {
                 blocks,
-                center: { x: starting_x, y: blocks[0].y },
+                center,
                 rotatable: false
             };
         }

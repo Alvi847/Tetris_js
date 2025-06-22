@@ -1,7 +1,11 @@
 ; document.addEventListener("DOMContentLoaded", init);
 
-const DELTA_TIME = 100;
-const INITIAL_PIECE_FALL_FACTOR = 10;
+const DELTA_TIME = 50; // Tiempo que transcurre entre cada frame (depende del ordenador pero como es un tetris se puede asumir así)
+const INITIAL_PIECE_FALL_FACTOR = 20; // Cada cuantos frames cae la pieza hacia abajo
+
+/**
+ * 1000ms/DELTA_TIME = FRAMES_PER_SECOND
+ */
 
 const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;
