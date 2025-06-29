@@ -187,22 +187,18 @@ class Piece {
             if (!Array.isArray(cells))
                 return null;
             y = 0;
-            let firstOs = true; // Variable usada para ignorar los primeros espacios en blanco ('O') en cada fila de pieza
             for (const singleCell of cells) {
-                if (firstOs && singleCell !== 'O') {
-                    firstOs = false;
+
+                if (singleCell === 'X') {
+                    blocks.push({ x: y, y: x });
                 }
-                if(!firstOs){
-                    if (singleCell === 'X') {
-                        blocks.push({ x: y, y: x });
-                    }
-                    else if (singleCell === 'C') {
-                        center = { x: y, y: x };
-                    }
-                    else if (singleCell !== 'O')
-                        return null;
-                    y++;
+                else if (singleCell === 'C') {
+                    center = { x: y, y: x };
                 }
+                else if (singleCell !== 'O')
+                    return null;
+                y++;
+
             }
             x++;
         }
@@ -334,7 +330,7 @@ class Piece {
         return piece_lines;
     }
 
-    spawnInPieceVisualizer(center, cells) {
+    spawnInPieceVisualizer(center, cells, columns, rows) {
         this.#center = center;
 
         cells[center.x][center.y].piece = this;
@@ -342,7 +338,10 @@ class Piece {
         for (let i = this.#shape.length - 1; i >= 0; i--) {
             const block = this.#shape[i];
             const block_coords = Cell.addCoords(this.#center, block);
-            cells[block_coords.x][block_coords.y].piece = this;
+
+            if(block_coords.x < columns && block_coords.y < rows){
+                cells[block_coords.x][block_coords.y].piece = this;
+            }
         }
     }
 

@@ -23,7 +23,7 @@ class PieceVisualizer extends DrawableBoard {
 
         if (!isEmptyObj(piece)) {
             const pieceCopy = new Piece(piece.name, piece.color, piece.shape, piece.center, piece.rotatable);
-            pieceCopy.spawnInPieceVisualizer({ x: Math.floor(this.#columns / 2), y: Math.floor(this.#rows / 2) }, this.#cells);
+            pieceCopy.spawnInPieceVisualizer({ x: Math.floor(this.#columns / 2), y: Math.floor(this.#rows / 2) }, this.#cells, this.#columns, this.#rows);
             this.#current_piece = pieceCopy;
         }
 
