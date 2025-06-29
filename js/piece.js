@@ -10,6 +10,7 @@ class Piece {
 
     #rotatable;
 
+    static parsed_pieces = []; // Array de piezas ya parseadas
     static possible_pieces = [
         {
             "name": 'Blue square',
@@ -18,7 +19,7 @@ class Piece {
                 ['X', 'X'],
                 ['X', 'X']
             ],
-            "weight": '100'
+            "weight": '10'
         },
         {
             "name": 'Red L',
@@ -72,8 +73,8 @@ class Piece {
             "name": 'Light blue ZigZag',
             "color": ['0', '255', '255'],
             "shape": [
-                ['X', 'C', 'O'],
-                ['O', 'X', 'X']
+                ['O', 'X', 'C', 'O'],
+                ['O', 'O', 'X', 'X']
             ],
             "weight": '20'
         },
@@ -96,7 +97,6 @@ class Piece {
         this.#rotatable = rotatable;
     }
 
-
     get name() {
         return this.#name;
     }
@@ -111,6 +111,29 @@ class Piece {
 
     get center() {
         return this.#center;
+    }
+
+    static loadPiece(starting_x, index) {
+        const piece_data = this.possible_pieces[index];
+        const name = piece_data.name;
+        if (name == null)
+            throw Error("All pieces must have a name");
+        if (Array.isArray(piece_data.color) && piece_data.color.length === 3) {
+            const color = RGBColor.createColorObject(Number(piece_data.color[0]), Number(piece_data.color[1]), Number(piece_data.color[2]));
+
+            let shape = piece_data.shape;
+            if (Array.isArray(shape)) {
+                shape = Piece.parseShape(shape, starting_x);
+                if (shape == null)
+                    throw Error("Invalid shape format for piece: %s", piece_data.name);
+                return { name: name, color: color, shape: shape.blocks, center: shape.center, rotatable: shape.rotatable };
+            }
+            else
+                throw Error("Invalid shape format for piece: %s", piece_data.name);
+
+        }
+        else
+            throw Error("Invalid rgb color format for piece: %s", piece_data.name);
     }
 
     static loadPieces(starting_x) {
@@ -129,12 +152,12 @@ class Piece {
                     if (shape == null)
                         throw Error("Invalid shape format for piece: %s", piece_data.name);
                     let piece_weight = 1;
-                    if(!Number.isNaN(piece_data.weight) && piece_data.weight > 1)
+                    if (!Number.isNaN(piece_data.weight) && piece_data.weight > 1)
                         piece_weight = piece_data.weight;
                     else
                         console.log(`Piece weight for piece ${name} is not valid. It must be a number above 0!  Using default weight instead...`);
                     const newPiece = { name: name, color: color, shape: shape.blocks, center: shape.center, rotatable: shape.rotatable };
-                    piece_array.push({piece: newPiece, weight: piece_weight});
+                    piece_array.push({ piece: newPiece, weight: piece_weight });
                 }
                 else
                     throw Error("Invalid shape format for piece: %s", piece_data.name);
@@ -153,6 +176,7 @@ class Piece {
             seen.add(name);
         }
 
+        Piece.parsed_pieces = piece_array;
         return piece_array;
     }
 
@@ -163,16 +187,22 @@ class Piece {
             if (!Array.isArray(cells))
                 return null;
             y = 0;
+            let firstOs = true; // Variable usada para ignorar los primeros espacios en blanco ('O') en cada fila de pieza
             for (const singleCell of cells) {
-                if (singleCell === 'X') {
-                    blocks.push({ x: y, y: x });
+                if (firstOs && singleCell !== 'O') {
+                    firstOs = false;
                 }
-                else if (singleCell === 'C') {
-                    center = { x: y, y: x };
+                if(!firstOs){
+                    if (singleCell === 'X') {
+                        blocks.push({ x: y, y: x });
+                    }
+                    else if (singleCell === 'C') {
+                        center = { x: y, y: x };
+                    }
+                    else if (singleCell !== 'O')
+                        return null;
+                    y++;
                 }
-                else if (singleCell !== 'O')
-                    return null;
-                y++;
             }
             x++;
         }
@@ -186,7 +216,7 @@ class Piece {
             };
         }
         else {
-            center = {x: starting_x, y: blocks.shift().y};
+            center = { x: starting_x, y: blocks.shift().y };
             return {
                 blocks,
                 center,
@@ -195,10 +225,10 @@ class Piece {
         }
     }
 
-    static copy(piece){
+    static copy(piece) {
         const shape_copy = [];
 
-        for(const block of piece.shape){
+        for (const block of piece.shape) {
             shape_copy.push(block);
         }
 
@@ -246,7 +276,7 @@ class Piece {
 
                 if (game_board.isMovementEnd(Cell.addCoords(this.#center, rotated_coords), this))
                     can_rotate = false;
-                else{
+                else {
                     new_coords.push(rotated_coords);
                 }
                 i--;
@@ -294,7 +324,7 @@ class Piece {
         for (let i = this.#shape.length - 1; i >= 0; i--) {
             const block = this.#shape[i];
             //if (piece_lines.length == 0 || piece_lines[piece_lines.length - 1] > this.#center.y + block.y)
-            if(!piece_lines.find((e) => {return e === this.#center.y + block.y}))
+            if (!piece_lines.find((e) => { return e === this.#center.y + block.y }))
                 piece_lines.push(this.#center.y + block.y);
         }
         if (!piece_lines.find((e) => {
@@ -304,7 +334,7 @@ class Piece {
         return piece_lines;
     }
 
-    spawnInNextPieceVisualizer(center, cells) {
+    spawnInPieceVisualizer(center, cells) {
         this.#center = center;
 
         cells[center.x][center.y].piece = this;

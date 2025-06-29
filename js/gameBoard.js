@@ -1,4 +1,4 @@
-class GameBoard {
+class GameBoard extends DrawableBoard{
     #columns;
     #rows;
     #canvas;
@@ -7,9 +7,6 @@ class GameBoard {
 
     #cells;
 
-    padding_left;
-    padding_up;
-
     draw_timer;
 
     seed;
@@ -17,8 +14,6 @@ class GameBoard {
     next_piece;
 
     falling_piece;
-
-    pieces;
 
     can_fall_piece;
 
@@ -31,7 +26,7 @@ class GameBoard {
     debug;
 
     static createBoard(canvas, next_piece_visualizer, points_manager) {
-        const { rows, cells, cell_size, padding_left, padding_up } = Utils.initBoardValues(canvas.width, canvas.height, COLUMNS);
+        const { rows, cells, cell_size, padding_left, padding_up } = DrawableBoard.initBoardValues(canvas.width, canvas.height, COLUMNS);
 
         return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up, points_manager);
     }
@@ -41,7 +36,7 @@ class GameBoard {
     }
 
     loadPieces() {
-        this.pieces = Piece.loadPieces(Math.floor(this.#columns / 2));
+        Piece.loadPieces(Math.floor(this.#columns / 2));
     }
 
     pickRandomPiece() {
@@ -49,7 +44,7 @@ class GameBoard {
 
         const total_weight = (() => {
             let weight_sum = 0;
-            for (const piece_data of this.pieces) {
+            for (const piece_data of Piece.parsed_pieces) {
                 weight_sum += Number(piece_data.weight);
             }
             return weight_sum;
@@ -59,7 +54,7 @@ class GameBoard {
 
         let accumulator = 0
 
-        for (const {piece, weight} of this.pieces) {
+        for (const {piece, weight} of Piece.parsed_pieces) {
             accumulator += Number(weight);
 
             if (rand < accumulator) {
@@ -68,7 +63,7 @@ class GameBoard {
         }
 
         //console.log('pickRandomPiece falló');
-        //return Piece.copy(this.pieces[index]);
+        //return Piece.copy(Piece.parsed_pieces[index]);
     }
 
     canSpawnPiece() {
@@ -78,8 +73,8 @@ class GameBoard {
     gameOver() {
         // Hacemos que el bucle de juego no se ejecute más 
         clearInterval(this.draw_timer);
-        GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size, this.padding_left, this.padding_up);
-        document.getElementById('game_over_rect').style.display = 'flex';
+        this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
+        document.getElementById('game_over_rect').style.visibility = 'visible';
 
     }
 
@@ -104,36 +99,7 @@ class GameBoard {
             }
         }
         // Se dibuja el tablero
-        GameBoard.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size, this.padding_left, this.padding_up);
-    }
-
-    static draw(canvas, columns, rows, cells, cell_size, padding_left, padding_up) {
-        if (canvas.getContext) {
-            const ctx = canvas.getContext("2d");
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height) // Se borra todo el tablero
-
-            GameBoard.drawGrid(ctx, columns, rows, cell_size, padding_left, padding_up);
-
-            for (let i = 0; i < columns; i++) {
-                for (let j = 0; j < rows; j++) {
-                    cells[i][j].draw(ctx, i * cell_size + padding_left, j * cell_size + padding_up, cell_size);
-                }
-            }
-        }
-    }
-
-    static drawGrid(ctx, columns, rows, cell_size, padding_left, padding_up) {
-        ctx.fillStyle = RGBColor.buildRGB(GRID_COLOR);
-        for (let i = 0; i <= columns; i++) {
-            ctx.fillRect(i * cell_size + padding_left, padding_up, 2, rows * cell_size);
-        }
-
-        for (let i = 0; i <= rows; i++) {
-            ctx.fillRect(padding_left, i * cell_size + padding_up, columns * cell_size, 2);
-        }
-
-        ctx.fillStyle = '#000';
+        this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
     }
 
     spawnFallingPiece() {
@@ -147,7 +113,7 @@ class GameBoard {
 
     pickNextPiece() {
         this.next_piece = this.pickRandomPiece();
-        this.#next_piece_visualizer.drawNextPiece(this.next_piece);
+        this.#next_piece_visualizer.drawPiece(this.next_piece);
     }
 
     updatePieceProjection() {
@@ -298,6 +264,7 @@ class GameBoard {
     }
 
     constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer, padding_left, padding_up, points_manager) {
+        super(padding_left, padding_up);
         this.#canvas = canvas;
         this.#rows = rows;
         this.#columns = columns;
@@ -305,8 +272,6 @@ class GameBoard {
         this.#cell_size = cell_size;
         this.lines = 0;
         this.#next_piece_visualizer = next_piece_visualizer;
-        this.padding_left = padding_left;
-        this.padding_up = padding_up;
         this.points_manager = points_manager;
         this.piece_projection_cells = [];
         this.debug = null;

@@ -5,6 +5,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    border: none;
 }
 
 
@@ -31,7 +32,7 @@
     padding: 10px;
 }
 
-.text-info-rect{
+.text-info-rect {
     border: 10px solid black;
     display: none;
     gap: 40%;
@@ -81,6 +82,33 @@ main {
     min-height: 100vh;
 }
 
+fieldset {
+    background-color: rgb(0, 0, 0);
+    height: 100%;
+}
+
+.fieldset_group {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    align-items: center;
+    gap: 10px;
+}
+
+.options_rect {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    background-color: rgb(0, 0, 0);
+    border: 5px solid rgb(26, 26, 26);
+    display: grid;
+    grid-template-rows: 20% 80%;
+    grid-template-columns: 100%;
+    justify-content: center;
+    align-items: center;
+    z-index: 2;
+}
+
 .dialogue_rect {
     position: absolute;
     width: 40%;
@@ -95,12 +123,47 @@ main {
     z-index: 2;
 }
 
-.dialogue_rect .title {
+.title {
     font-size: 30px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#edit_rect {
+    visibility: hidden;
+}
+
+#edit_rect .container {
+    padding: 10px;
+    display: flex;
+    max-height: 45vh;
+    width: 100%;
+}
+
+#edit_rect .container .editor {
+    display: flex;
+    flex-direction: column;
+    max-height: 45vh;
+    width: 80%;
+    justify-content: center;
+    align-items: center;
 }
 
 #game_over_rect {
-    display: none;
+    visibility: hidden;
+}
+
+#available_pieces {
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+}
+
+#available_pieces .edit_piece_entry:hover {
+    filter: brightness(1.2);
 }
 
 button {
@@ -109,7 +172,7 @@ button {
     cursor: pointer;
     font-family: inherit;
     background-color: #ffffff;
-    border-radius: 10px;       
+    border-radius: 10px;
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
@@ -133,7 +196,8 @@ button:hover {
 }
 
 .light_yellow {
-    color: #ffff99; /* amarillo claro */
+    color: #ffff99;
+    /* amarillo claro */
 }
 
 .yellow {
@@ -145,7 +209,8 @@ button:hover {
 }
 
 .dark_green {
-    color: #006400; /* verde oscuro */
+    color: #006400;
+    /* verde oscuro */
 }
 
 .blue {
@@ -153,7 +218,8 @@ button:hover {
 }
 
 .dark_blue {
-    color: #00008B; /* azul oscuro */
+    color: #00008B;
+    /* azul oscuro */
 }
 
 .purple {

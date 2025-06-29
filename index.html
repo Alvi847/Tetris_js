@@ -9,7 +9,7 @@
         <div class="contenedor">
             <div class="dialogue_rect" id="start_rect">
                 <div class="title">
-                <span>Welcome to</span>
+                    <span>Welcome to</span>
                     <span class="red">T</span>
                     <span class="orange">e</span>
                     <span class="light_yellow">t</span>
@@ -21,6 +21,20 @@
                     <span class="purple">s</span>
                 </div>
                 <button type="button" id="start_button">Start</button>
+                <button type="button" id="edit_button">Edit Pieces</button>
+            </div>
+            <div class="options_rect" id="edit_rect">
+                <div class="title">
+                    <span>Edit pieces</span>
+                </div>
+                <div class="container">
+                    <div id="available_pieces">
+                        <!--Aquí van las piezas-->
+                    </div>
+                    <div class="editor">
+
+                    </div>
+                </div>
             </div>
             <div>
                 <canvas id="canvas" class="tablero"></canvas>
@@ -47,11 +61,12 @@
 
 
 <script src="js/init.js"></script>
+<script src="js/drawableBoard.js"></script>
 <script src="js/piece.js"></script>
 <script src="js/cell.js"></script>
 <script src="js/color.js"></script>
 <script src="js/gameBoard.js"></script>
-<script src="js/nextPieceVisualizer.js"></script>
-<script src="js/utils.js"></script>
+<script src="js/pieceVisualizer.js"></script>
+<script src="js/utils.js"></script> <!--Por ahora no lo uso xd-->
 <script src="js/points.js"></script>
 <script src="js/debugManager.js"></script>
