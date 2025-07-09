@@ -185,6 +185,11 @@ button:hover {
     border-color: #b8b8b8;
 }
 
+.buttons_div {
+    display: flex;
+    gap: 10px;
+}
+
 
 /* Colores para cada <span> del título*/
 .red {

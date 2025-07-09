@@ -31,6 +31,8 @@ const DEBUG_INSPECTED_CELL_COLOR = { r: 255, g: 255, b: 255, a: 1 };
 const DEBUG_RED_CROSS_COLOR = { r: 255, g: 0, b: 0, a: 1 };
 
 let game_board;
+let double_click;
+let timeout;
 
 function init() {
     const start_button = document.getElementById('start_button');
@@ -131,7 +133,7 @@ function openEditMenu() {
     }
 
     document.querySelector("#edit_rect").style.visibility = 'visible';
-    document.querySelector("#start_rect").style.visibility = 'visible';
+    document.querySelector("#start_rect").style.visibility = 'hidden';
 }
 
 function editPiece(e) {
@@ -170,14 +172,25 @@ function editPiece(e) {
 
     createField('name', piece.name, 'Name:', edit_fieldset);
     createField('weight', piece.weight, 'Weight:', edit_fieldset);
+    //createField('rotatable', piece.rotatable, 'Rotatable:', edit_fieldset, 'checkbox');
 
     const buttons_div = document.createElement('div');
+
+    buttons_div.className = 'buttons_div';
 
     const save_button = document.createElement('button');
     save_button.textContent = 'Save';
     save_button.type = 'button';
     save_button.addEventListener("click", savePiece);
+
+    const exit_button = document.createElement('button');
+    exit_button.textContent = 'Exit';
+    exit_button.type = 'button';
+    exit_button.addEventListener("click", goToMainMenu);
+
     buttons_div.appendChild(save_button);
+    buttons_div.appendChild(exit_button);
+    
 
     edit_form.appendChild(edit_fieldset);
 
@@ -186,7 +199,7 @@ function editPiece(e) {
     editor_div.appendChild(buttons_div);
 }
 
-function createField(input_name, input_value, label_value, fieldset) {
+function createField(input_name, input_value, label_value, fieldset, type = 'text') {
     const field_div = document.createElement('div');
     field_div.className = 'fieldset_group';
 
@@ -197,7 +210,11 @@ function createField(input_name, input_value, label_value, fieldset) {
     const field_input = document.createElement('input');
     field_input.name = input_name;
     field_input.id = input_name;
-    field_input.value = (input_value || '');
+    if(type != 'checkbox' && type != 'radio')
+        field_input.value = (input_value || '');
+    else
+        field_input.checked = (input_value || false);
+    field_input.type = type;
 
     field_div.appendChild(field_label);
     field_div.appendChild(field_input);
@@ -206,6 +223,11 @@ function createField(input_name, input_value, label_value, fieldset) {
 }
 
 function processEditPieceClick(e) {
+
+    setTimeout({
+        
+    }, 500);
+
     const canvas = e.target;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -237,7 +259,7 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
     const parsed_color = new RGBColor(0, 0, 255);
 
 
-    try {
+    try { //TODO: Comprobar que la pieza es un grafo Hamiltoniano (No tiene partes separadas)
         if (Piece.possible_pieces.length > index) {
             updatePieceInVisualizer(index, piece_shape, piece.name, piece.weight, parsed_color);
             Piece.possible_pieces[index] = piece;
@@ -269,4 +291,9 @@ function parsePieceShape(piece_shape) {
     }
     else
         throw Error('Invalid piece shape');
+}
+
+function goToMainMenu(){
+    document.querySelector("#edit_rect").style.visibility = 'hidden';
+    document.querySelector("#start_rect").style.visibility = 'visible';
 }

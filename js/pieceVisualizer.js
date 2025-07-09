@@ -63,7 +63,10 @@ class PieceVisualizer extends DrawableBoard {
                 if(!cell.isPiece())
                     shape_row.push('O');
                 else{
-                    shape_row.push('X');
+                    if(this.#current_piece.center.x == column && this.#current_piece.center.y == row)
+                        shape_row.push('C');
+                    else
+                        shape_row.push('X');
                     row_has_blocks = true;
                 }
 
