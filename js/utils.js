@@ -1,5 +1,5 @@
 class Utils{
-    /**
-     * Actualmente esto no se usa
-     */
+    static wait(ms) {
+        return new Promise(res => setTimeout(res, ms));
+    }
 }

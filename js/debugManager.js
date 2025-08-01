@@ -10,21 +10,11 @@ class DebugManager {
     #cells;
 
     debug_confirm;
+    gui_manager;
+    confirm_timer;
 
     debugConfirm() {
         this.debug_confirm = true;
-    }
-
-    waitForConfirm() {
-        return new Promise((resolve) => {
-            const listener = (e) => {
-                if(e.key == 'd'){
-                    document.removeEventListener("keydown", listener);
-                    resolve();
-                }
-            }
-            document.addEventListener("keydown", listener);
-        });
     }
 
     async debugDraw(operationObj, ...cells) {
@@ -52,7 +42,7 @@ class DebugManager {
                 break;
 
         }
-        await this.waitForConfirm();
+        await Utils.wait(DEBUG_DRAW_WAIT);
     }
 
     drawCross(ctx, color, origin, width) {
@@ -70,7 +60,11 @@ class DebugManager {
         ctx.strokeStyle = 'black';
     }
 
-    constructor(game_board, columns, rows, canvas, next_piece_visualizer, cell_size, cells) {
+    updateDebugGUI(fall_speed, points_in_level){
+        this.gui_manager.debugUpdateCounters(fall_speed, points_in_level);
+    }
+
+    constructor(game_board, columns, rows, canvas, next_piece_visualizer, cell_size, cells, gui_manager) {
         this.#game_board = game_board;
         this.#columns = columns;
         this.#rows = rows;
@@ -78,6 +72,7 @@ class DebugManager {
         this.#next_piece_visualizer = next_piece_visualizer;
         this.#cell_size = cell_size;
         this.#cells = cells;
+        this.gui_manager = gui_manager;
     }
 
 }

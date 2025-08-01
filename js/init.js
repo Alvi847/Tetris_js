@@ -7,7 +7,7 @@ const INITIAL_PIECE_FALL_FACTOR = 20; // Cada cuantos frames cae la pieza hacia 
  * 1000ms/DELTA_TIME = FRAMES_PER_SECOND
  */
 
-const GAME_VERSION = 'alpha 0.1'; // Versión del juego
+const GAME_VERSION = 'alpha 0.2'; // Versión del juego
 
 const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;
@@ -23,15 +23,17 @@ const CELL_SIZE_REDUCTION = 1;
 
 const PIECE_PROJECTION_ALPHA = 0.1;
 
-const GUI_GAME_INFO_CLASSES = '.tablero, .text_info_rect';
+const GUI_GAME_INFO_CLASSES = '.tablero, .text_info_rect:not(#debug_info_rect)';
 
 const GUI_GAME_MENUS_IDS = ['#edit_rect', '#pause_rect', '#game_over_rect']; // Array de los ids html de cada menú del juego A EXCEPCIÓN DEL MENÚ PRINCIPAL
 
-const DEBUG_MODE = false; //Activate debug mode
+const DEBUG_MODE = true; //Activate debug mode
 
 // Debug Constants
 const DEBUG_INSPECTED_CELL_COLOR = { r: 255, g: 255, b: 255, a: 1 };
 const DEBUG_RED_CROSS_COLOR = { r: 255, g: 0, b: 0, a: 1 };
+const DEBUG_DRAW_WAIT = 10;     
+
 
 let game_board;
 let double_click;
@@ -45,9 +47,16 @@ function init() {
     const restart_buttons = document.getElementsByClassName('restart_button');
     const pause_buttons = document.getElementsByClassName('pause_button');
     const exit_buttons = document.getElementsByClassName('exit_button');
+    
+    const resume_button = document.getElementById('resume_button');
+    resume_button.addEventListener("click", resumeGame);
+
     const version_span = document.getElementById('version_span');
 
     version_span.textContent = `Version: ${GAME_VERSION}`;
+
+    if(DEBUG_MODE)
+        version_span.textContent += '_debug';
 
     for (const start_button of start_buttons) {
         start_button.addEventListener("click", startGame);
@@ -111,12 +120,6 @@ function startGame(e) {
 
     const button = e.target;
     const gui_elements = document.querySelectorAll(GUI_GAME_INFO_CLASSES);
-    /*const canvas = document.createElement('canvas');
-
-    canvas.id = 'canvas';
-    canvas.className = 'tablero';
-
-    document.getElementById('main_canvas_div').appendChild(canvas);*/
     const canvas = document.getElementById('canvas');
 
     canvas.width = 500;
@@ -138,8 +141,10 @@ function startGame(e) {
 
     game_board = GameBoard.createBoard(canvas, npv, points_manager);
 
-    if (DEBUG_MODE)
+    if (DEBUG_MODE){
         debug_manager = game_board.setDebugManager();
+        points_manager.loadDebugText(showAndGetDebugGUI());
+    }
 
     game_board.loadPieces();
 
@@ -174,6 +179,21 @@ function getPointsGUI() {
     const points = document.querySelector('.text_info_rect > [name="points"]');
 
     return new GameTextGUI(points, level, lines);
+}
+
+function showAndGetDebugGUI(){
+    const debug_labels = {};
+    const debug_gui = document.querySelectorAll('#debug_info_rect');
+
+    for (let i = 0; i < debug_gui.length; i++) { // Forma vaga de mostrar el cuadro de texto debug
+        debug_gui.item(i).style.display = 'flex';
+        debug_gui.item(i).style.backgroundColor = RGBColor.buildRGB(RGBColor.createColorObject(GUI_BACKGROUND_COLOR.r, GUI_BACKGROUND_COLOR.g, GUI_BACKGROUND_COLOR.b));
+    }
+
+    debug_labels.fall_speed = document.querySelector('.text_info_rect > [name="debug_fall_speed"]');
+    debug_labels.points_in_level = document.querySelector('.text_info_rect > [name="debug_points_in_level"]');
+    
+    return debug_labels; 
 }
 
 function openEditMenu() {

@@ -44,6 +44,8 @@
             </div>
             <div class="game_container" id="game_board_container">
                 <div class="dialogue_rect" id="pause_rect">
+                    <span class="title">Game Paused</span>
+                    <button type="button" id="resume_button">Resume</button>
                     <button type="button" class="exit_button" id="close_game_button">Exit</button>
                 </div>
                 <div id="main_canvas_div">
@@ -54,11 +56,18 @@
                         <h3 class="text_info">NEXT PIECE:</h3>
                         <canvas id="next-piece-canvas" class="tablero"></canvas>
                     </div>
+                    <div>
+                        <div class="text_info_rect">
+                            <span class="text_info" name="points"></span>
+                            <span class="text_info" name="level"></span>
+                            <span class="text_info" name="lines"></span>
+                        </div>
 
-                    <div class="text_info_rect">
-                        <span class="text_info" name="points">Points </span>
-                        <span class="text_info" name="level">Level </span>
-                        <span class="text_info" name="lines">Lines </span>
+                        <div class="text_info_rect" id="debug_info_rect">
+                            <span class="title">Debug info</span>
+                            <span class="debug_info" name="debug_fall_speed"></span>
+                            <span class="debug_info" name="debug_points_in_level"></span>
+                        </div>
                     </div>
                 </div>
                 <div class="dialogue_rect" id="game_over_rect">

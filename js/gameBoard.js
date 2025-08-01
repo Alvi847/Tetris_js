@@ -38,7 +38,7 @@ class GameBoard extends DrawableBoard {
     }
 
     setDebugManager() {
-        this.debug = new DebugManager(this, COLUMNS, this.#rows, this.#canvas, this.#next_piece_visualizer, this.#cell_size, this.#cells)
+        this.debug = new DebugManager(this, COLUMNS, this.#rows, this.#canvas, this.#next_piece_visualizer, this.#cell_size, this.#cells, this.game_text_gui_manager)
         return this.debug;
     }
 
@@ -87,6 +87,8 @@ class GameBoard extends DrawableBoard {
         this.points = 0;
         this.points_in_current_level = 0;
         this.game_text_gui_manager.updateGUICounters(this.lines, this.points, this.current_level);
+        if(this.debug)
+            this.debug.updateDebugGUI(this.fall_speed, this.points_in_current_level);
         this.setTimers();
     }
 
@@ -208,6 +210,10 @@ class GameBoard extends DrawableBoard {
                 this.points_in_current_level = new_level_data.points_in_level;
                 this.current_level = new_level_data.level;
                 this.fall_speed = new_level_data.fall_speed;
+                this.updateFallSpeed();
+
+                if(this.debug)
+                    this.debug.updateDebugGUI(this.fall_speed, this.points_in_current_level);
             }
 
             this.game_text_gui_manager.updateGUICounters(this.lines, this.points, this.current_level);
@@ -223,6 +229,11 @@ class GameBoard extends DrawableBoard {
     stopTimers() {
         clearInterval(this.draw_timer);
         clearInterval(this.fall_timer);
+    }
+
+    updateFallSpeed(){
+        clearInterval(this.fall_timer);
+        this.fall_timer = setInterval(() => { this.can_fall_piece = true }, DELTA_TIME * this.fall_speed);
     }
 
     async checkForLines() {
