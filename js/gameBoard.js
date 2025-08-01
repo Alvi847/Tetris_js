@@ -78,6 +78,7 @@ class GameBoard extends DrawableBoard {
     }
 
     pauseGame() {
+        this.paused = true;
         this.stopTimers();
     }
 
@@ -87,40 +88,44 @@ class GameBoard extends DrawableBoard {
         this.points = 0;
         this.points_in_current_level = 0;
         this.game_text_gui_manager.updateGUICounters(this.lines, this.points, this.current_level);
-        if(this.debug)
+        if (this.debug)
             this.debug.updateDebugGUI(this.fall_speed, this.points_in_current_level);
+        this.paused = false;
         this.setTimers();
     }
 
     gameOver() {
         // Hacemos que el bucle de juego no se ejecute más 
+        this.paused = true;
         this.stopTimers();
         this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
         document.getElementById('game_over_rect').style.visibility = 'visible';
     }
 
     gameLoop() {
-        // Se elige la siguiente pieza
-        if (!this.next_piece) {
-            this.pickNextPiece();
-        }
-        if (!this.falling_piece) {
-            this.spawnFallingPiece();
-        }
-        if (this.can_fall_piece) {
-            this.can_fall_piece = false;
-
-            // Se mueve la pieza actual
-            this.falling_piece.move(this, { x: 0, y: 1 });
-
-            // Se calculan colisiones
-            if (!this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
-                // La pieza ha llegado hasta abajo, se cambia a la siguiente pieza y se calculan lineas
-                this.processMovementEnd();
+        if (!this.paused) {
+            // Se elige la siguiente pieza
+            if (!this.next_piece) {
+                this.pickNextPiece();
             }
+            if (!this.falling_piece) {
+                this.spawnFallingPiece();
+            }
+            if (this.can_fall_piece) {
+                this.can_fall_piece = false;
+
+                // Se mueve la pieza actual
+                this.falling_piece.move(this, { x: 0, y: 1 });
+
+                // Se calculan colisiones
+                if (!this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
+                    // La pieza ha llegado hasta abajo, se cambia a la siguiente pieza y se calculan lineas
+                    this.processMovementEnd();
+                }
+            }
+            // Se dibuja el tablero
+            this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
         }
-        // Se dibuja el tablero
-        this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
     }
 
     spawnFallingPiece() {
@@ -159,29 +164,35 @@ class GameBoard extends DrawableBoard {
     }
 
     sideArrowKeyPressed(key) {
-        const direction = { x: key, y: 0 };
-        if (this.falling_piece.moveLateralIfAble(this, direction)) {
-            if (!this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
-                this.processMovementEnd();
+        if (!this.paused) {
+            const direction = { x: key, y: 0 };
+            if (this.falling_piece.moveLateralIfAble(this, direction)) {
+                if (!this.falling_piece.checkCollisions(this, { x: 0, y: 1 })) {
+                    this.processMovementEnd();
+                }
+                else
+                    this.updatePieceProjection();
             }
-            else
-                this.updatePieceProjection();
         }
     }
 
     upArrowKeyPressed() {
-        if (this.falling_piece.rotateIfAble(this, 1))
-            this.updatePieceProjection();
+        if (!this.paused) {
+            if (this.falling_piece.rotateIfAble(this, 1))
+                this.updatePieceProjection();
+        }
 
     }
 
     downArrowKeyPressed() {
-        if (this.next_piece != null) {
+        if (!this.paused) {
+            if (this.next_piece != null) {
 
-            const final_position = this.calculateFinalPosition();
-            this.falling_piece.move(this, final_position);
+                const final_position = this.calculateFinalPosition();
+                this.falling_piece.move(this, final_position);
 
-            this.processMovementEnd();
+                this.processMovementEnd();
+            }
         }
     }
 
@@ -198,7 +209,7 @@ class GameBoard extends DrawableBoard {
         this.falling_piece.movementEnd();
         const newLines = await this.checkForLines();
         if (newLines > 0) { // Solo se ejecuta si se han hecho líneas
-            const points_obtained = Level.pointsPerLine(this.current_level) * newLines;
+            const points_obtained = Level.pointsPerLine(this.current_level) * newLines + 10000;
 
             this.lines += newLines;
             this.points += points_obtained;
@@ -212,7 +223,7 @@ class GameBoard extends DrawableBoard {
                 this.fall_speed = new_level_data.fall_speed;
                 this.updateFallSpeed();
 
-                if(this.debug)
+                if (this.debug)
                     this.debug.updateDebugGUI(this.fall_speed, this.points_in_current_level);
             }
 
@@ -231,7 +242,7 @@ class GameBoard extends DrawableBoard {
         clearInterval(this.fall_timer);
     }
 
-    updateFallSpeed(){
+    updateFallSpeed() {
         clearInterval(this.fall_timer);
         this.fall_timer = setInterval(() => { this.can_fall_piece = true }, DELTA_TIME * this.fall_speed);
     }
