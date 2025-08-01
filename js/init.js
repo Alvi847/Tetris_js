@@ -329,7 +329,7 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
 
     try { //TODO: Comprobar que la pieza es un grafo Hamiltoniano (No tiene partes separadas)
         if (Piece.possible_pieces.length > index) {
-            updatePieceInVisualizer(index, piece_shape, piece.name, piece.weight, parsed_color);
+            updatePieceInVisualizers(index, piece_shape, piece.name, piece.weight, parsed_color);
             Piece.possible_pieces[index] = piece;
         }
         else {
@@ -342,12 +342,16 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
     }
 }
 
-function updatePieceInVisualizer(index, piece_shape, name, weight, color) {
+function updatePieceInVisualizers(index, piece_shape, name, weight, color) {
     const piece_entry_visualizer = document.querySelector(`.edit_piece_entry[id='${index}'] canvas`).piece_visualizer;
-
+    const edit_piece_visualizer = document.querySelector('.edit_piece_visualizer canvas').piece_visualizer;
+    
     const { blocks, center, rotatable } = parsePieceShape(piece_shape);
     const piece = new Piece(name, color, blocks, center, rotatable);
+
     piece_entry_visualizer.drawPiece(piece);
+    edit_piece_visualizer.drawPiece(piece);
+    
     Piece.parsed_pieces[index] = { piece, weight };
 }
 
