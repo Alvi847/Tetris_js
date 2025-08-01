@@ -7,6 +7,8 @@ const INITIAL_PIECE_FALL_FACTOR = 20; // Cada cuantos frames cae la pieza hacia 
  * 1000ms/DELTA_TIME = FRAMES_PER_SECOND
  */
 
+const GAME_VERSION = 'alpha 0.1'; // Versión del juego
+
 const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;
 const MAX_PIECE_HEIGHT = 5;
@@ -43,6 +45,9 @@ function init() {
     const restart_buttons = document.getElementsByClassName('restart_button');
     const pause_buttons = document.getElementsByClassName('pause_button');
     const exit_buttons = document.getElementsByClassName('exit_button');
+    const version_span = document.getElementById('version_span');
+
+    version_span.textContent = `Version: ${GAME_VERSION}`;
 
     for (const start_button of start_buttons) {
         start_button.addEventListener("click", startGame);
@@ -53,7 +58,10 @@ function init() {
     }
 
     for (const restart_button of restart_buttons) {
-        restart_button.addEventListener("click", startGame);
+        restart_button.addEventListener("click", (e) => {
+            document.getElementById('game_over_rect').style.visibility = 'hidden';
+            startGame(e);
+        });
     }
 
     for (const pause_button of pause_buttons) {
@@ -165,7 +173,7 @@ function getPointsGUI() {
     const level = document.querySelector('.text_info_rect > [name="level"]');
     const points = document.querySelector('.text_info_rect > [name="points"]');
 
-    return new Points(points, level, lines);
+    return new GameTextGUI(points, level, lines);
 }
 
 function openEditMenu() {
@@ -351,7 +359,7 @@ function updatePieceInVisualizers(index, piece_shape, name, weight, color) {
 
     piece_entry_visualizer.drawPiece(piece);
     edit_piece_visualizer.drawPiece(piece);
-    
+
     Piece.parsed_pieces[index] = { piece, weight };
 }
 
