@@ -246,7 +246,7 @@ function editPiece(e) {
 
     createField('name', piece.name, 'Name:', edit_fieldset);
     createField('weight', piece.weight, 'Weight:', edit_fieldset);
-    createField('color', piece.color, 'Color:', edit_fieldset, 'color');
+    createField('color', RGBColor.RGBColortoHex(piece.color), 'Color:', edit_fieldset, 'color');
     //createField('rotatable', piece.rotatable, 'Rotatable:', edit_fieldset, 'checkbox');
 
     const buttons_div = document.createElement('div');
