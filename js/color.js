@@ -44,6 +44,19 @@ class RGBColor {
             throw Error(`Invalid color format, RGB values must be integer numbers and alpha channel must be a decimal number (${r}, ${g}, ${b}, ${a})`);
     }
 
+    static hexToRGBColor(hex){
+        let r, g, b;
+
+        r = Number("0x" + hex[1] + hex[2]);
+        g = Number("0x" + hex[3] + hex[4]);
+        b = Number("0x" + hex[5] + hex[6]);
+
+        if(Number.isInteger(r) && Number.isInteger(g) && Number.isInteger(b))
+            return RGBColor.correctValues({r: r, g: g, b: b})
+        else
+            throw Error(`Invalid color format, hex value must be between 0 and FFFFFF (${hex})`);
+    }
+
     static correctValues(color){
         if(color.r < 0)
             color.r = 0

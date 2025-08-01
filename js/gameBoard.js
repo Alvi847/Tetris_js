@@ -8,6 +8,7 @@ class GameBoard extends DrawableBoard{
     #cells;
 
     draw_timer;
+    fall_timer;
 
     seed;
 
@@ -33,6 +34,7 @@ class GameBoard extends DrawableBoard{
 
     setDebugManager() {
         this.debug = new DebugManager(this, COLUMNS, this.#rows, this.#canvas, this.#next_piece_visualizer, this.#cell_size, this.#cells)
+        return this.debug;
     }
 
     loadPieces() {
@@ -70,9 +72,17 @@ class GameBoard extends DrawableBoard{
         return this.falling_piece.checkCollisions(this, { x: 0, y: 1 });
     }
 
+    pauseGame(){
+        this.stopTimers();
+    }
+
+    startGame(){
+        this.setTimers();
+    }
+
     gameOver() {
         // Hacemos que el bucle de juego no se ejecute más 
-        clearInterval(this.draw_timer);
+        this.stopTimers();
         this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
         document.getElementById('game_over_rect').style.visibility = 'visible';
 
@@ -185,10 +195,17 @@ class GameBoard extends DrawableBoard{
 
     setTimers() {
         this.draw_timer = setInterval(() => this.gameLoop(), DELTA_TIME);
-        this.can_fall_piece = setInterval(() => { this.can_fall_piece = true }, DELTA_TIME * INITIAL_PIECE_FALL_FACTOR);
+        this.fall_timer = setInterval(() => { this.can_fall_piece = true }, DELTA_TIME * INITIAL_PIECE_FALL_FACTOR);
     }
 
-    checkForLines() {
+    stopTimers(){
+        clearInterval(this.draw_timer);
+        clearInterval(this.fall_timer);
+    }
+
+    async checkForLines() {
+        if(this.debug)
+            this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
         let lines = 0;
         let upper_line = null;
         const piece_lines = this.falling_piece.getLines();
@@ -197,14 +214,14 @@ class GameBoard extends DrawableBoard{
             let i = 0;
             while (i < this.#columns && is_line) {
 
-                this.debugDraw({ type: 'CELL_INSPECTION', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]])
+                await this.debugDraw({ type: 'CELL_INSPECTION', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]])
 
                 if (!this.#cells[i][piece_lines[j]].isPiece()) {
                     is_line = false;
-                    this.debugDraw({ type: 'NO_LINE_CELL', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]])
+                    await this.debugDraw({ type: 'NO_LINE_CELL', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]])
                 }
                 else
-                    this.debugDraw({ type: 'DEFAULT_DRAW', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]]);
+                    await this.debugDraw({ type: 'DEFAULT_DRAW', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]]);
 
                 i++;
             }
@@ -224,9 +241,12 @@ class GameBoard extends DrawableBoard{
         return lines;
     }
 
-    debugDraw(operationObj, ...cells) {
-        if (this.debug)
-            this.debug.debugDraw(operationObj, ...cells);
+    async debugDraw(operationObj, ...cells) {
+        if (this.debug){
+            this.stopTimers();
+            await this.debug.debugDraw(operationObj, ...cells);
+            this.setTimers();
+        }
     }
 
     processNewLines(lines, upper_line) {

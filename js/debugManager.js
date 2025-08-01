@@ -9,7 +9,25 @@ class DebugManager {
 
     #cells;
 
-    debugDraw(operationObj, ...cells) {
+    debug_confirm;
+
+    debugConfirm() {
+        this.debug_confirm = true;
+    }
+
+    waitForConfirm() {
+        return new Promise((resolve) => {
+            const listener = (e) => {
+                if(e.key == 'd'){
+                    document.removeEventListener("keydown", listener);
+                    resolve();
+                }
+            }
+            document.addEventListener("keydown", listener);
+        });
+    }
+
+    async debugDraw(operationObj, ...cells) {
         switch (operationObj.type) {
             case 'CELL_INSPECTION':
                 cells.forEach((cell) => {
@@ -34,6 +52,7 @@ class DebugManager {
                 break;
 
         }
+        await this.waitForConfirm();
     }
 
     drawCross(ctx, color, origin, width) {

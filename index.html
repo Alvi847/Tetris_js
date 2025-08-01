@@ -6,7 +6,7 @@
 
 <body>
     <main>
-        <div class="contenedor">
+        <div class="game_container" id="main_menu_container">
             <div class="dialogue_rect" id="start_rect">
                 <div class="title">
                     <span>Welcome to</span>
@@ -20,9 +20,11 @@
                     <span class="dark_blue">j</span>
                     <span class="purple">s</span>
                 </div>
-                <button type="button" id="start_button">Start</button>
-                <button type="button" id="edit_button">Edit Pieces</button>
+                <button type="button" class="start_button">Start</button>
+                <button type="button" class="edit_button">Edit Pieces</button>
             </div>
+        </div>
+        <div class="game_container" id="other_container">
             <div class="options_rect" id="edit_rect">
                 <div class="title">
                     <span>Edit pieces</span>
@@ -35,25 +37,33 @@
 
                     </div>
                 </div>
-            </div>
-            <div>
-                <canvas id="canvas" class="tablero"></canvas>
-            </div>
-            <div class="info">
-                <div>
-                    <h3 class="text-info">NEXT PIECE:</h3>
-                    <canvas id="next-piece-canvas" class="tablero"></canvas>
+                <div class="buttons_div">
+                    <button type="button" class="exit_button">Exit</button>
                 </div>
+            </div>
+            <div class="game_container" id="game_board_container">
+                <div class="dialogue_rect" id="pause_rect">
+                    <button type="button" class="exit_button" id="close_game_button">Exit</button>
+                </div>
+                <div id="main_canvas_div">
+                    <canvas id="canvas" class="tablero"></canvas>
+                </div>
+                <div class="info">
+                    <div>
+                        <h3 class="text_info">NEXT PIECE:</h3>
+                        <canvas id="next-piece-canvas" class="tablero"></canvas>
+                    </div>
 
-                <div class="text-info-rect">
-                    <span class="text-info" name="points">Points </span>
-                    <span class="text-info" name="level">Level </span>
-                    <span class="text-info" name="lines">Lines </span>
+                    <div class="text_info_rect">
+                        <span class="text_info" name="points">Points </span>
+                        <span class="text_info" name="level">Level </span>
+                        <span class="text_info" name="lines">Lines </span>
+                    </div>
                 </div>
-            </div>
-            <div class="dialogue_rect" id="game_over_rect">
-                <span class="title">Game Over</span>
-                <button type="button" id="restart_button">Play Again</button>
+                <div class="dialogue_rect" id="game_over_rect">
+                    <span class="title">Game Over</span>
+                    <button type="button" class="restart_button">Play Again</button>
+                </div>
             </div>
         </div>
     </main>

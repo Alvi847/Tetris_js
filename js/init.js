@@ -21,8 +21,9 @@ const CELL_SIZE_REDUCTION = 1;
 
 const PIECE_PROJECTION_ALPHA = 0.1;
 
-const GUI_ELEMENTS_CLASSES = '.tablero, .text-info-rect';
+const GUI_GAME_INFO_CLASSES = '.tablero, .text_info_rect';
 
+const GUI_GAME_MENUS_IDS = ['#edit_rect', '#pause_rect', '#game_over_rect']; // Array de los ids html de cada menú del juego A EXCEPCIÓN DEL MENÚ PRINCIPAL
 
 const DEBUG_MODE = false; //Activate debug mode
 
@@ -33,41 +34,85 @@ const DEBUG_RED_CROSS_COLOR = { r: 255, g: 0, b: 0, a: 1 };
 let game_board;
 let double_click;
 let timeout;
+let game_paused;
+let game_started;
 
 function init() {
-    const start_button = document.getElementById('start_button');
-    const edit_button = document.getElementById('edit_button');
-    const restart_button = document.getElementById('restart_button');
+    const start_buttons = document.getElementsByClassName('start_button');
+    const edit_buttons = document.getElementsByClassName('edit_button');
+    const restart_buttons = document.getElementsByClassName('restart_button');
+    const pause_buttons = document.getElementsByClassName('pause_button');
+    const exit_buttons = document.getElementsByClassName('exit_button');
 
-    start_button.addEventListener("click", startGame);
-    restart_button.addEventListener("click", startGame);
-    edit_button.addEventListener("click", openEditMenu);
+    for (const start_button of start_buttons) {
+        start_button.addEventListener("click", startGame);
+    }
+
+    for (const edit_button of edit_buttons) {
+        edit_button.addEventListener("click", openEditMenu);
+    }
+
+    for (const restart_button of restart_buttons) {
+        restart_button.addEventListener("click", startGame);
+    }
+
+    for (const pause_button of pause_buttons) {
+        pause_button.addEventListener("click", pauseGame);
+    }
+
+    for (const exit_button of exit_buttons) {
+        exit_button.addEventListener("click", goToMainMenu);
+    }
+
+    const close_game_button = document.getElementById('close_game_button');
+    close_game_button.addEventListener("click", setNullGame);
 
     document.addEventListener('keydown', (e) => {
-        if (e.key == 'ArrowLeft') {
-            game_board.sideArrowKeyPressed(-1);
-        }
-        else if (e.key == 'ArrowRight') {
-            game_board.sideArrowKeyPressed(1);
-        }
-        else if (e.key == 'ArrowDown') {
-            game_board.downArrowKeyPressed();
-        }
-        else if (e.key == 'ArrowUp') {
-            game_board.upArrowKeyPressed();
+        if (game_board) {
+            if (e.key == 'ArrowLeft') {
+                game_board.sideArrowKeyPressed(-1);
+            }
+            else if (e.key == 'ArrowRight') {
+                game_board.sideArrowKeyPressed(1);
+            }
+            else if (e.key == 'ArrowDown') {
+                game_board.downArrowKeyPressed();
+            }
+            else if (e.key == 'ArrowUp') {
+                game_board.upArrowKeyPressed();
+            }
+            else if (e.key == 'Escape') {
+                if (game_paused && game_started)
+                    resumeGame();
+                else if (game_started)
+                    pauseGame();
+            }
         }
     });
 }
 
+function setNullGame() {
+    game_board = null; // Nos aseguramos de que aquí no hay ningún juego creado
+    const canvas = document.getElementById('canvas')
+    canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+    //document.getElementById('main_canvas_div').innerHTML = ''; // Vaciamos el canvas del tablero para que no haya múltiples tableros dibujados
+}
+
 function startGame(e) {
+    setNullGame();
+
     const button = e.target;
-    const gui_elements = document.querySelectorAll(GUI_ELEMENTS_CLASSES);
+    const gui_elements = document.querySelectorAll(GUI_GAME_INFO_CLASSES);
+    /*const canvas = document.createElement('canvas');
+
+    canvas.id = 'canvas';
+    canvas.className = 'tablero';
+
+    document.getElementById('main_canvas_div').appendChild(canvas);*/
     const canvas = document.getElementById('canvas');
 
     canvas.width = 500;
     canvas.height = 900;
-
-    button.parentNode.style.display = 'none';
 
     const next_piece_canvas = document.getElementById('next-piece-canvas');
 
@@ -86,24 +131,46 @@ function startGame(e) {
     game_board = GameBoard.createBoard(canvas, npv, points_manager);
 
     if (DEBUG_MODE)
-        game_board.setDebugManager();
+        debug_manager = game_board.setDebugManager();
 
     game_board.loadPieces();
 
-    game_board.setTimers();
+    hideMainMenu();
+    document.getElementById('game_board_container').style.visibility = 'visible';
+    game_board.startGame();
+
+    game_started = true;
+    game_paused = false;
 
 }
 
+function pauseGame() {
+    if (game_board) { // Si se presiona el teclado se hace dos veces esta comprobación
+        game_board.pauseGame();
+        document.querySelector('#pause_rect').style.visibility = 'visible';
+        game_paused = true;
+    }
+}
+
+function resumeGame() {
+    if (game_board) {
+        game_board.startGame();
+        document.querySelector('#pause_rect').style.visibility = 'hidden';
+        game_paused = false;
+    }
+}
+
 function getPointsGUI() {
-    const lines = document.querySelector('.text-info-rect > [name="lines"]');
-    const level = document.querySelector('.text-info-rect > [name="level"]');
-    const points = document.querySelector('.text-info-rect > [name="points"]');
+    const lines = document.querySelector('.text_info_rect > [name="lines"]');
+    const level = document.querySelector('.text_info_rect > [name="level"]');
+    const points = document.querySelector('.text_info_rect > [name="points"]');
 
     return new Points(points, level, lines);
 }
 
 function openEditMenu() {
     const pieces_div = document.querySelector(".options_rect .container #available_pieces");
+    //const buttons_div = document.querySelector(".options_rect .buttons_div");
 
     const pieces_array = Piece.loadPieces(0);
 
@@ -131,9 +198,16 @@ function openEditMenu() {
 
         pieces_div.appendChild(div);
     }
-
+    /*
+        const exit_button = document.createElement('button');
+        exit_button.textContent = 'Exit';
+        exit_button.type = 'button';
+        exit_button.addEventListener("click", goToMainMenu);
+    
+        buttons_div.appendChild(exit_button);
+    */
     document.querySelector("#edit_rect").style.visibility = 'visible';
-    document.querySelector("#start_rect").style.visibility = 'hidden';
+    hideMainMenu();
 }
 
 function editPiece(e) {
@@ -172,6 +246,7 @@ function editPiece(e) {
 
     createField('name', piece.name, 'Name:', edit_fieldset);
     createField('weight', piece.weight, 'Weight:', edit_fieldset);
+    createField('color', piece.color, 'Color:', edit_fieldset, 'color');
     //createField('rotatable', piece.rotatable, 'Rotatable:', edit_fieldset, 'checkbox');
 
     const buttons_div = document.createElement('div');
@@ -183,14 +258,7 @@ function editPiece(e) {
     save_button.type = 'button';
     save_button.addEventListener("click", savePiece);
 
-    const exit_button = document.createElement('button');
-    exit_button.textContent = 'Exit';
-    exit_button.type = 'button';
-    exit_button.addEventListener("click", goToMainMenu);
-
     buttons_div.appendChild(save_button);
-    buttons_div.appendChild(exit_button);
-    
 
     edit_form.appendChild(edit_fieldset);
 
@@ -210,7 +278,7 @@ function createField(input_name, input_value, label_value, fieldset, type = 'tex
     const field_input = document.createElement('input');
     field_input.name = input_name;
     field_input.id = input_name;
-    if(type != 'checkbox' && type != 'radio')
+    if (type != 'checkbox' && type != 'radio')
         field_input.value = (input_value || '');
     else
         field_input.checked = (input_value || false);
@@ -225,7 +293,7 @@ function createField(input_name, input_value, label_value, fieldset, type = 'tex
 function processEditPieceClick(e) {
 
     setTimeout({
-        
+
     }, 500);
 
     const canvas = e.target;
@@ -255,8 +323,8 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
 
     const piece_shape = canvas.piece_visualizer.scanShape();
 
-    const piece = { name: pieceData.name, weight: pieceData.weight, color: ['0', '0', '255'], shape: piece_shape}; //TODO: cambiar el color
-    const parsed_color = new RGBColor(0, 0, 255);
+    const parsed_color = RGBColor.hexToRGBColor(pieceData.color);
+    const piece = { name: pieceData.name, weight: pieceData.weight, color: [parsed_color.r, parsed_color.g, parsed_color.b], shape: piece_shape }; //TODO: cambiar el color
 
 
     try { //TODO: Comprobar que la pieza es un grafo Hamiltoniano (No tiene partes separadas)
@@ -269,7 +337,7 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
             Piece.possible_pieces.push(piece);
         }
     }
-    catch(e){
+    catch (e) {
         console.log(e.message);
     }
 }
@@ -277,23 +345,39 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
 function updatePieceInVisualizer(index, piece_shape, name, weight, color) {
     const piece_entry_visualizer = document.querySelector(`.edit_piece_entry[id='${index}'] canvas`).piece_visualizer;
 
-    const {blocks, center, rotatable} = parsePieceShape(piece_shape);
+    const { blocks, center, rotatable } = parsePieceShape(piece_shape);
     const piece = new Piece(name, color, blocks, center, rotatable);
     piece_entry_visualizer.drawPiece(piece);
-    Piece.parsed_pieces[index] = {piece, weight};
+    Piece.parsed_pieces[index] = { piece, weight };
 }
 
 function parsePieceShape(piece_shape) {
-    const {blocks, center, rotatable} = Piece.parseShape(piece_shape, 0);
+    const { blocks, center, rotatable } = Piece.parseShape(piece_shape, 0);
 
     if (blocks != null) {
-        return {blocks, center, rotatable};
+        return { blocks, center, rotatable };
     }
     else
         throw Error('Invalid piece shape');
 }
 
-function goToMainMenu(){
-    document.querySelector("#edit_rect").style.visibility = 'hidden';
-    document.querySelector("#start_rect").style.visibility = 'visible';
+function goToMainMenu() {
+    document.querySelector("#other_container").style.display = 'none';
+    document.querySelector("#main_menu_container").style.display = 'flex';
+
+    // Para asegurarnos de que ningún menú se queda abierto en el juego los cerramos todos, menos el menú principal
+    for (const menu_id of GUI_GAME_MENUS_IDS) {
+        document.querySelector(menu_id).style.visibility = 'hidden';
+    }
+
+    // Quitamos el tablero de la pantalla para que no aparezca detrás de algún menú fuera del juego
+    document.getElementById('game_board_container').style.visibility = 'hidden';
+
+
+}
+
+
+function hideMainMenu() {
+    document.querySelector("#main_menu_container").style.display = 'none';
+    document.querySelector("#other_container").style.display = 'flex';
 }
