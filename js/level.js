@@ -6,7 +6,8 @@ class Level {
 
     static LEVEL_0 = { // Nivel 0, define los valores por defecto
         "points_per_line": 10,
-        "speed_increase": 1
+        "speed_increase": 1,
+        "combo_points": 5
     }
 
 
@@ -23,6 +24,7 @@ class Level {
      *          "points": 100, // Puntos con respecto al nivel anterior, se asume que el nivel 1 está en 0 puntos
      *          "speed_increase": 1, // El número por el que se multiplica la velocidad con respecto al nivel anterior, 1 si no se quieren cambios en la velocidad
      *          "points_per_line": 10, // Puntos que vale cada línea en este nivel. No es obligatorio que esté, ya que por defecto son 10
+     *          "combo_points": 5 // Cuando se hacen varias líneas a la vez, son los puntos extra que da cada línea hecha después de la primera
      *      },
      */
     static LEVEL_TABLE = {
@@ -57,6 +59,16 @@ class Level {
         }
         else if (level === 0)
             return Level.LEVEL_0.points_per_line;
+        else
+            throw new Error(`Non existent level (${level})`);
+    }
+
+    static comboPoints(level){
+        if (level > 0 && level <= Level.LEVEL_TABLE.max_level) {
+            return (Level.LEVEL_TABLE.levels[level - 1].combo_points || Level.LEVEL_0.combo_points);
+        }
+        else if (level === 0)
+            return Level.LEVEL_0.combo_points;
         else
             throw new Error(`Non existent level (${level})`);
     }

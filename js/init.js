@@ -7,7 +7,7 @@ const INITIAL_PIECE_FALL_FACTOR = 20; // Cada cuantos frames cae la pieza hacia 
  * 1000ms/DELTA_TIME = FRAMES_PER_SECOND
  */
 
-const GAME_VERSION = 'alpha 0.4'; // Versión del juego
+const GAME_VERSION = 'alpha 0.4.1'; // Versión del juego
 
 const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;

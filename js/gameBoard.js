@@ -211,7 +211,9 @@ class GameBoard extends DrawableBoard {
         this.falling_piece.movementEnd();
         const newLines = await this.checkForLines();
         if (newLines > 0) { // Solo se ejecuta si se han hecho líneas
-            const points_obtained = Level.pointsPerLine(this.current_level) * newLines;
+
+            // Puntos por línea en el nivel más los puntos de combo si se hacen más líneas a la vez
+            const points_obtained = Level.pointsPerLine(this.current_level) * newLines + (newLines - 1) * Level.comboPoints(this.current_level);
 
             this.lines += newLines;
             this.points += points_obtained;
