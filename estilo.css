@@ -161,6 +161,12 @@ fieldset {
     align-items: center;
 }
 
+.left_editor_column{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
 #game_over_rect {
     visibility: hidden;
 }
@@ -200,7 +206,6 @@ button:hover {
     gap: 10px;
     justify-content: center;
 }
-
 
 /* Colores para cada <span> del título*/
 .red {

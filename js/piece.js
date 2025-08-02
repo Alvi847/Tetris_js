@@ -10,6 +10,8 @@ class Piece {
 
     #rotatable;
 
+    weight;
+
     static parsed_pieces = []; // Array de piezas ya parseadas
     static possible_pieces = [
         {
@@ -89,12 +91,13 @@ class Piece {
         },
     ]
 
-    constructor(name, color, shape, center, rotatable) {
+    constructor(name, color, shape, center, rotatable, weight) {
         this.#name = name;
         this.color = color;
         this.#center = center;
         this.#shape = shape;
         this.#rotatable = rotatable;
+        this.weight = weight;
     }
 
     get name() {
@@ -113,20 +116,25 @@ class Piece {
         return this.#center;
     }
 
-    static loadPiece(starting_x, index) {
-        const piece_data = this.possible_pieces[index];
-        const name = piece_data.name;
-        if (name == null)
+    static loadPiece(piece_data){
+        if (piece_data.name == null)
             throw Error("All pieces must have a name");
         if (Array.isArray(piece_data.color) && piece_data.color.length === 3) {
             const color = RGBColor.createColorObject(Number(piece_data.color[0]), Number(piece_data.color[1]), Number(piece_data.color[2]));
 
             let shape = piece_data.shape;
             if (Array.isArray(shape)) {
-                shape = Piece.parseShape(shape, starting_x);
+                shape = Piece.parseShape(shape);
                 if (shape == null)
                     throw Error("Invalid shape format for piece: %s", piece_data.name);
-                return { name: name, color: color, shape: shape.blocks, center: shape.center, rotatable: shape.rotatable };
+
+                let piece_weight = 1;
+                const aux_weight = piece_data.weight;
+                if (!Number.isNaN(aux_weight) && aux_weight > 1)
+                    piece_weight = aux_weight;
+                else
+                    console.log(`Piece weight for piece ${piece_data.name} is not valid. It must be a number above 0!  Using default weight instead...`);
+                return new Piece(piece_data.name, color, shape.blocks, shape.center, shape.rotatable, piece_weight);
             }
             else
                 throw Error("Invalid shape format for piece: %s", piece_data.name);
@@ -136,23 +144,27 @@ class Piece {
             throw Error("Invalid rgb color format for piece: %s", piece_data.name);
     }
 
-    static loadPieces(starting_x) {
+    static loadPieceJSON(piece_json){
+        return this.loadPiece(piece_json);
+    }
+
+    static loadHardCodedPiece(index) {
+        const piece_data = this.possible_pieces[index];
+
+        return this.loadPiece(piece_data);
+                
+    }
+
+    static loadHardCodedPieces() {
         const piece_array = [];
         for (let index = 0; index < this.possible_pieces.length; index++) {
-            const newPiece = Piece.loadPiece(starting_x, index);
-            
-            let piece_weight = 1;
-            const aux_weight = this.possible_pieces[index];
-            if (!Number.isNaN(aux_weight) && aux_weight > 1)
-                piece_weight = aux_weight;
-            else
-                console.log(`Piece weight for piece ${newPiece.name} is not valid. It must be a number above 0!  Using default weight instead...`);
-            piece_array.push({ piece: newPiece, weight: piece_weight });
+            const new_piece = Piece.loadHardCodedPiece(index);
+            piece_array.push(new_piece);
         }
 
         const seen = new Set();
         for (const obj of piece_array) {
-            const name = obj.piece.name;
+            const name = obj.name;
             if (seen.has(name)) {
                 throw Error("All piece names must be unique!");
             }
@@ -163,7 +175,7 @@ class Piece {
         return piece_array;
     }
 
-    static parseShape(shape, starting_x) {
+    static parseShape(shape) {
         const blocks = [];
         let center, x = 0, y = 0;
         for (const cells of shape) {
@@ -190,12 +202,12 @@ class Piece {
             const mapped_blocks = blocks.map(b => ({ x: b.x - center.x, y: b.y - center.y }))
             return {
                 blocks: mapped_blocks,
-                center: { x: starting_x, y: Math.abs(mapped_blocks[0].y) },
+                center: { x: 0, y: Math.abs(mapped_blocks[0].y) },
                 rotatable: true
             };
         }
         else {
-            center = { x: starting_x, y: blocks.shift().y };
+            center = { x: 0, y: blocks.shift().y };
             return {
                 blocks,
                 center,
@@ -211,7 +223,7 @@ class Piece {
             shape_copy.push(block);
         }
 
-        return new Piece(piece.name, piece.color, shape_copy, piece.center, piece.rotatable);
+        return new Piece(piece.name, piece.color, shape_copy, piece.center, piece.rotatable, piece.weight);
     }
 
     toJSON() {
@@ -336,5 +348,9 @@ class Piece {
         }
         cells.push(Cell.addCoords(position, this.#center));
         return cells;
+    }
+
+    movePieceToSpawn(starting_x){
+        this.#center.x = starting_x;
     }
 }

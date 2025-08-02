@@ -12,9 +12,9 @@ class PieceVisualizer extends DrawableBoard {
     }
 
     static createPieceVisualizer(canvas) {
-        const { rows, cells, cell_size, padding_left, padding_up } = DrawableBoard.initBoardValues(canvas.width, canvas.height, MAX_PIECE_WIDTH);
+        const { rows, cells, cell_size, padding_left, padding_up, starting_x, starting_y } = DrawableBoard.initBoardValues(canvas.width, canvas.height, MAX_PIECE_WIDTH);
 
-        return new PieceVisualizer(canvas, rows, MAX_PIECE_WIDTH, cells, cell_size, padding_left, padding_up);
+        return new PieceVisualizer(canvas, rows, MAX_PIECE_WIDTH, cells, cell_size, padding_left, padding_up, starting_x, starting_y);
     }
 
     drawPiece(piece) {
@@ -22,8 +22,8 @@ class PieceVisualizer extends DrawableBoard {
         this.clear();
 
         if (!isEmptyObj(piece)) {
-            const pieceCopy = new Piece(piece.name, piece.color, piece.shape, piece.center, piece.rotatable);
-            pieceCopy.spawnInPieceVisualizer({ x: Math.floor(this.#columns / 2), y: Math.floor(this.#rows / 2) }, this.#cells, this.#columns, this.#rows);
+            const pieceCopy = new Piece(piece.name, piece.color, piece.shape, piece.center, piece.rotatable, piece.weight);
+            pieceCopy.spawnInPieceVisualizer({ x: this.starting_x, y: this.starting_y }, this.#cells, this.#columns, this.#rows);
             this.#current_piece = pieceCopy;
         }
 
@@ -43,7 +43,7 @@ class PieceVisualizer extends DrawableBoard {
     toggleCell(cell) {
         const board_cell = this.#cells[cell.column][cell.row];
         if (!board_cell.isPiece()) {
-            const piece_to_paint = (this.#current_piece || new Piece()) // TODO: color???
+            //const piece_to_paint = (this.#current_piece || new Piece()) // TODO: color???
             board_cell.piece = this.#current_piece;
         }
         else {
@@ -91,8 +91,8 @@ class PieceVisualizer extends DrawableBoard {
         }
     }
 
-    constructor(canvas, rows, columns, cells, cell_size, padding_left, padding_up) {
-        super(padding_left, padding_up);
+    constructor(canvas, rows, columns, cells, cell_size, padding_left, padding_up, starting_x, starting_y) {
+        super(padding_left, padding_up, starting_x, starting_y);
         this.#canvas = canvas;
         this.#cell_size = cell_size;
         this.#cells = cells;

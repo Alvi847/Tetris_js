@@ -1,6 +1,7 @@
 class DrawableBoard{
 
-
+    starting_x;
+    starting_y;
     padding_left;
     padding_up;
 
@@ -20,8 +21,10 @@ class DrawableBoard{
         const padding_left = Math.floor((CELL_SIZE_REDUCTION * columns) / 2);
 
         const padding_up = Math.floor((CELL_SIZE_REDUCTION * rows) / 2);
+        const starting_x = Math.floor(columns / 2); 
+        const starting_y = Math.floor(rows / 2);
 
-        return {rows, cell_size, cells, columns, padding_left, padding_up}
+        return {rows, cell_size, cells, columns, padding_left, padding_up, starting_x, starting_y}
 
     }
 
@@ -54,8 +57,10 @@ class DrawableBoard{
         ctx.fillStyle = '#000';
     }
 
-    constructor(padding_left, padding_up){
+    constructor(padding_left, padding_up, starting_x, starting_y){
         this.padding_left = padding_left;
         this.padding_up = padding_up;
+        this.starting_x = starting_x;
+        this.starting_y = starting_y;
     }
 }

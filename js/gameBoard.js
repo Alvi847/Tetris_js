@@ -32,9 +32,9 @@ class GameBoard extends DrawableBoard {
 
 
     static createBoard(canvas, next_piece_visualizer, game_text_gui_manager) {
-        const { rows, cells, cell_size, padding_left, padding_up } = DrawableBoard.initBoardValues(canvas.width, canvas.height, COLUMNS);
+        const { rows, cells, cell_size, padding_left, padding_up, starting_x } = DrawableBoard.initBoardValues(canvas.width, canvas.height, COLUMNS);
 
-        return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up, game_text_gui_manager);
+        return new GameBoard(canvas, rows, COLUMNS, cells, cell_size, next_piece_visualizer, padding_left, padding_up, game_text_gui_manager, starting_x);
     }
 
     setDebugManager() {
@@ -43,7 +43,8 @@ class GameBoard extends DrawableBoard {
     }
 
     loadPieces() {
-        Piece.loadPieces(Math.floor(this.#columns / 2));
+        if (Piece.parsed_pieces.length == 0)
+            Piece.loadHardCodedPieces(this.starting_x);
     }
 
     pickRandomPiece() {
@@ -61,11 +62,11 @@ class GameBoard extends DrawableBoard {
 
         let accumulator = 0
 
-        for (const { piece, weight } of Piece.parsed_pieces) {
-            accumulator += Number(weight);
+        for (const piece_data of Piece.parsed_pieces) {
+            accumulator += Number(piece_data.weight);
 
             if (rand < accumulator) {
-                return Piece.copy(piece);
+                return Piece.copy(piece_data);
             }
         }
 
@@ -130,6 +131,7 @@ class GameBoard extends DrawableBoard {
 
     spawnFallingPiece() {
         this.falling_piece = this.next_piece;
+        this.falling_piece.movePieceToSpawn(this.starting_x);
         if (!this.canSpawnPiece()) {
             return this.gameOver();
         }
@@ -327,8 +329,8 @@ class GameBoard extends DrawableBoard {
         return coords.y < 0 || coords.y > this.#rows - 1 || coords.x < 0 || coords.x > this.#columns - 1;
     }
 
-    constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer, padding_left, padding_up, game_text_gui_manager) {
-        super(padding_left, padding_up);
+    constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer, padding_left, padding_up, game_text_gui_manager, starting_x) {
+        super(padding_left, padding_up, starting_x, 0);
         this.#canvas = canvas;
         this.#rows = rows;
         this.#columns = columns;

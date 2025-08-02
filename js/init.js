@@ -7,7 +7,7 @@ const INITIAL_PIECE_FALL_FACTOR = 20; // Cada cuantos frames cae la pieza hacia 
  * 1000ms/DELTA_TIME = FRAMES_PER_SECOND
  */
 
-const GAME_VERSION = 'alpha 0.2.1'; // Versión del juego
+const GAME_VERSION = 'alpha 0.3'; // Versión del juego
 
 const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;
@@ -27,12 +27,23 @@ const GUI_GAME_INFO_CLASSES = '.tablero, .text_info_rect:not(#debug_info_rect)';
 
 const GUI_GAME_MENUS_IDS = ['#edit_rect', '#pause_rect', '#game_over_rect']; // Array de los ids html de cada menú del juego A EXCEPCIÓN DEL MENÚ PRINCIPAL
 
+const DEFAULT_NEW_PIECE = {
+    "name": '',
+    "color": ['0', '0', '255'],
+    "shape": [
+        ['X', 'X'],
+        ['X', 'X']
+    ],
+    "weight": '10'
+};
+
+
 const DEBUG_MODE = true; //Activate debug mode
 
 // Debug Constants
 const DEBUG_INSPECTED_CELL_COLOR = { r: 255, g: 255, b: 255, a: 1 };
 const DEBUG_RED_CROSS_COLOR = { r: 255, g: 0, b: 0, a: 1 };
-const DEBUG_DRAW_WAIT = 10;     
+const DEBUG_DRAW_WAIT = 10;
 
 
 let game_board;
@@ -47,7 +58,10 @@ function init() {
     const restart_buttons = document.getElementsByClassName('restart_button');
     const pause_buttons = document.getElementsByClassName('pause_button');
     const exit_buttons = document.getElementsByClassName('exit_button');
-    
+
+    const add_piece_button = document.getElementsByClassName('add_piece_button');
+    add_piece_button.item(0).addEventListener("click", addPiece);
+
     const resume_button = document.getElementById('resume_button');
     resume_button.addEventListener("click", resumeGame);
 
@@ -55,7 +69,7 @@ function init() {
 
     version_span.textContent = `Version: ${GAME_VERSION}`;
 
-    if(DEBUG_MODE)
+    if (DEBUG_MODE)
         version_span.textContent += '_debug';
 
     for (const start_button of start_buttons) {
@@ -141,7 +155,7 @@ function startGame(e) {
 
     game_board = GameBoard.createBoard(canvas, npv, points_manager);
 
-    if (DEBUG_MODE){
+    if (DEBUG_MODE) {
         debug_manager = game_board.setDebugManager();
         points_manager.loadDebugText(showAndGetDebugGUI());
     }
@@ -181,7 +195,7 @@ function getPointsGUI() {
     return new GameTextGUI(points, level, lines);
 }
 
-function showAndGetDebugGUI(){
+function showAndGetDebugGUI() {
     const debug_labels = {};
     const debug_gui = document.querySelectorAll('#debug_info_rect');
 
@@ -192,48 +206,43 @@ function showAndGetDebugGUI(){
 
     debug_labels.fall_speed = document.querySelector('.text_info_rect > [name="debug_fall_speed"]');
     debug_labels.points_in_level = document.querySelector('.text_info_rect > [name="debug_points_in_level"]');
-    
-    return debug_labels; 
+
+    return debug_labels;
+}
+
+function addEditPieceEntry(id, piece) {
+    const pieces_div = document.querySelector(".options_rect .container #available_pieces");
+
+    const div = document.createElement('div');
+
+    div.className = 'edit_piece_entry';
+    div.id = `${id}`;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = 100;
+    canvas.height = canvas.width;
+
+    div.style.backgroundColor = RGBColor.buildRGB(GUI_BACKGROUND_COLOR);
+    div.style.transition = 'filter 0.2s ease';
+    div.appendChild(canvas);
+    div.addEventListener("click", editPiece);
+
+    const piece_visualizer = PieceVisualizer.createPieceVisualizer(canvas);
+    piece_visualizer.drawPiece(piece);
+    canvas.piece_visualizer = piece_visualizer;
+
+    pieces_div.appendChild(div);
 }
 
 function openEditMenu() {
-    const pieces_div = document.querySelector(".options_rect .container #available_pieces");
-    //const buttons_div = document.querySelector(".options_rect .buttons_div");
+    if (Piece.parsed_pieces.length == 0) {
+        const pieces_array = Piece.loadHardCodedPieces(0);
 
-    const pieces_array = Piece.loadPieces(0);
-
-    for (let i = 0; i < pieces_array.length; i++) {
-
-        const piece = pieces_array[i].piece;
-
-        const div = document.createElement('div');
-
-        div.className = 'edit_piece_entry';
-        div.id = `${i}`;
-
-        const canvas = document.createElement('canvas');
-        canvas.width = 100;
-        canvas.height = canvas.width;
-
-        div.style.backgroundColor = RGBColor.buildRGB(GUI_BACKGROUND_COLOR);
-        div.style.transition = 'filter 0.2s ease';
-        div.appendChild(canvas);
-        div.addEventListener("click", editPiece);
-
-        const piece_visualizer = PieceVisualizer.createPieceVisualizer(canvas);
-        piece_visualizer.drawPiece(piece);
-        canvas.piece_visualizer = piece_visualizer;
-
-        pieces_div.appendChild(div);
+        for (let i = 0; i < pieces_array.length; i++) {
+            addEditPieceEntry(i, pieces_array[i]);
+        }
     }
-    /*
-        const exit_button = document.createElement('button');
-        exit_button.textContent = 'Exit';
-        exit_button.type = 'button';
-        exit_button.addEventListener("click", goToMainMenu);
-    
-        buttons_div.appendChild(exit_button);
-    */
+
     document.querySelector("#edit_rect").style.visibility = 'visible';
     hideMainMenu();
 }
@@ -247,8 +256,7 @@ function editPiece(e) {
 
     let piece;
     if (Piece.parsed_pieces.length > index) {
-        piece = Piece.parsed_pieces[index].piece;
-        piece.weight = Piece.parsed_pieces[index].weight;
+        piece = Piece.parsed_pieces[index];
     }
     else
         piece = {};
@@ -320,9 +328,7 @@ function createField(input_name, input_value, label_value, fieldset, type = 'tex
 
 function processEditPieceClick(e) {
 
-    setTimeout({
-
-    }, 500);
+    //setTimeout({}, 500);
 
     const canvas = e.target;
     const rect = canvas.getBoundingClientRect();
@@ -363,6 +369,7 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
         else {
             parsePieceShape(piece_shape); //TODO cambiar en el futuro??
             Piece.possible_pieces.push(piece);
+            updatePieceInVisualizers(index, piece_shape, piece.name, piece.weight, parsed_color);
         }
     }
     catch (e) {
@@ -373,14 +380,14 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
 function updatePieceInVisualizers(index, piece_shape, name, weight, color) {
     const piece_entry_visualizer = document.querySelector(`.edit_piece_entry[id='${index}'] canvas`).piece_visualizer;
     const edit_piece_visualizer = document.querySelector('.edit_piece_visualizer canvas').piece_visualizer;
-    
+
     const { blocks, center, rotatable } = parsePieceShape(piece_shape);
-    const piece = new Piece(name, color, blocks, center, rotatable);
+    const piece = new Piece(name, color, blocks, center, rotatable, weight);
 
     piece_entry_visualizer.drawPiece(piece);
     edit_piece_visualizer.drawPiece(piece);
 
-    Piece.parsed_pieces[index] = { piece, weight };
+    Piece.parsed_pieces[index] = piece;
 }
 
 function parsePieceShape(piece_shape) {
@@ -402,14 +409,25 @@ function goToMainMenu() {
         document.querySelector(menu_id).style.visibility = 'hidden';
     }
 
+    document.querySelector(".editor").innerHTML = '';
+
     // Quitamos el tablero de la pantalla para que no aparezca detrás de algún menú fuera del juego
     document.getElementById('game_board_container').style.visibility = 'hidden';
 
 
 }
 
-
 function hideMainMenu() {
     document.querySelector("#main_menu_container").style.display = 'none';
     document.querySelector("#other_container").style.display = 'flex';
+}
+
+function addPiece() {
+    const new_name = `Default piece ${Piece.parsed_pieces.length}`;
+    const new_piece = { name: new_name, color: DEFAULT_NEW_PIECE.color, shape: DEFAULT_NEW_PIECE.shape, weight: DEFAULT_NEW_PIECE.weight }
+    const piece_obj = Piece.loadPieceJSON(new_piece);
+
+    Piece.parsed_pieces.push(piece_obj);
+
+    addEditPieceEntry(Piece.parsed_pieces.length - 1, piece_obj);
 }
