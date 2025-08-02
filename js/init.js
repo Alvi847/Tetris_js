@@ -7,7 +7,7 @@ const INITIAL_PIECE_FALL_FACTOR = 20; // Cada cuantos frames cae la pieza hacia 
  * 1000ms/DELTA_TIME = FRAMES_PER_SECOND
  */
 
-const GAME_VERSION = 'alpha 0.3'; // Versión del juego
+const GAME_VERSION = 'alpha 0.4'; // Versión del juego
 
 const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;
@@ -236,15 +236,25 @@ function addEditPieceEntry(id, piece) {
 
 function openEditMenu() {
     if (Piece.parsed_pieces.length == 0) {
-        const pieces_array = Piece.loadHardCodedPieces(0);
-
-        for (let i = 0; i < pieces_array.length; i++) {
-            addEditPieceEntry(i, pieces_array[i]);
-        }
+        loadAvailablePieces();
     }
 
     document.querySelector("#edit_rect").style.visibility = 'visible';
     hideMainMenu();
+}
+
+function loadAvailablePieces() {
+    const pieces_array = Piece.loadHardCodedPieces(0);
+
+    for (let i = 0; i < pieces_array.length; i++) {
+        addEditPieceEntry(i, pieces_array[i]);
+    }
+}
+
+function reloadAvailablePieces(){
+    document.querySelector('.container #available_pieces').replaceChildren();
+
+    loadAvailablePieces();
 }
 
 function editPiece(e) {
@@ -294,7 +304,13 @@ function editPiece(e) {
     save_button.type = 'button';
     save_button.addEventListener("click", savePiece);
 
+    const delete_button = document.createElement('button');
+    delete_button.textContent = 'Delete piece';
+    delete_button.type = 'button';
+    delete_button.addEventListener("click", deletePiece);
+
     buttons_div.appendChild(save_button);
+    buttons_div.appendChild(delete_button);
 
     edit_form.appendChild(edit_fieldset);
 
@@ -374,6 +390,19 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
     }
     catch (e) {
         console.log(e.message);
+    }
+}
+
+function deletePiece() {
+    if (confirm("Are you sure you want to delete this piece?")) {
+        const editor_div = document.querySelector('#edit_rect .container .editor');
+        const index = Number(editor_div.id);
+
+        Piece.possible_pieces.splice(index, 1);
+        Piece.parsed_pieces.splice(index, 1);
+
+        editor_div.replaceChildren();
+        reloadAvailablePieces();
     }
 }
 
