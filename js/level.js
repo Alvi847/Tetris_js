@@ -36,20 +36,20 @@ class Level {
             { points: 100, speed_increase: 1.15, points_per_line: 10 },  // Nivel 4
             { points: 100, speed_increase: 1.2, points_per_line: 10 },  // Nivel 5
             { points: 100, speed_increase: 1.25, points_per_line: 10 },  // Nivel 6
-            { points: 150, speed_increase: 1.3, points_per_line: 12 },  // Nivel 7
-            { points: 150, speed_increase: 1.35, points_per_line: 12 },  // Nivel 8
-            { points: 150, speed_increase: 1.4, points_per_line: 12 },  // Nivel 9
-            { points: 150, speed_increase: 1.45, points_per_line: 12 },  // Nivel 10
-            { points: 150, speed_increase: 1.5, points_per_line: 12 },  // Nivel 11
-            { points: 150, speed_increase: 1.55, points_per_line: 12 },  // Nivel 12
-            { points: 200, speed_increase: 1.6, points_per_line: 15 },  // Nivel 13
-            { points: 200, speed_increase: 1.65, points_per_line: 15 },  // Nivel 14
-            { points: 200, speed_increase: 1.7, points_per_line: 15 },  // Nivel 15
-            { points: 200, speed_increase: 1.75, points_per_line: 15 },  // Nivel 16
-            { points: 200, speed_increase: 1.8, points_per_line: 15 },  // Nivel 17
-            { points: 300, speed_increase: 1.85, points_per_line: 20 },  // Nivel 18
-            { points: 300, speed_increase: 1.9, points_per_line: 20 },  // Nivel 19
-            { points: 300, speed_increase: 2.0, points_per_line: 25 }   // Nivel 20
+            { points: 150, speed_increase: 1.3, points_per_line: 12, combo_points: 10 },  // Nivel 7
+            { points: 150, speed_increase: 1.35, points_per_line: 12, combo_points: 10 },  // Nivel 8
+            { points: 150, speed_increase: 1.4, points_per_line: 12, combo_points: 10 },  // Nivel 9
+            { points: 150, speed_increase: 1.45, points_per_line: 12, combo_points: 10 },  // Nivel 10
+            { points: 150, speed_increase: 1.5, points_per_line: 12, combo_points: 10 },  // Nivel 11
+            { points: 150, speed_increase: 1.55, points_per_line: 12, combo_points: 10 },  // Nivel 12
+            { points: 200, speed_increase: 1.6, points_per_line: 15, combo_points: 20 },  // Nivel 13
+            { points: 200, speed_increase: 1.65, points_per_line: 15, combo_points: 20 },  // Nivel 14
+            { points: 200, speed_increase: 1.7, points_per_line: 15, combo_points: 25 },  // Nivel 15
+            { points: 200, speed_increase: 1.75, points_per_line: 15, combo_points: 25 },  // Nivel 16
+            { points: 200, speed_increase: 1.8, points_per_line: 15, combo_points: 25 },  // Nivel 17
+            { points: 300, speed_increase: 1.85, points_per_line: 20, combo_points: 35 },  // Nivel 18
+            { points: 300, speed_increase: 1.9, points_per_line: 20, combo_points: 35 },  // Nivel 19
+            { points: 300, speed_increase: 2.0, points_per_line: 25, combo_points: 40 }   // Nivel 20
         ]
     }
 
