@@ -293,6 +293,15 @@ function editPiece(e) {
     createField('name', piece.name, 'Name:', edit_fieldset);
     createField('weight', piece.weight, 'Weight:', edit_fieldset);
     createField('color', RGBColor.RGBColortoHex(piece.color), 'Color:', edit_fieldset, 'color');
+    createField('center_select', "", 'Select piece center mode:', edit_fieldset, 'checkbox');
+
+    const edit_span = document.createElement("span");
+
+    edit_span.textContent = "Center piece edit mode toggled";
+    edit_span.style.color = RGBColor.buildRGB(BLACK);
+    edit_span.style.visibility = 'hidden';
+    edit_span.style.fontSize = '25px';
+
     //createField('rotatable', piece.rotatable, 'Rotatable:', edit_fieldset, 'checkbox');
 
     const buttons_div = document.createElement('div');
@@ -316,7 +325,23 @@ function editPiece(e) {
 
     editor_div.appendChild(div);
     editor_div.appendChild(edit_form);
+    editor_div.appendChild(edit_span);
     editor_div.appendChild(buttons_div);
+    
+    document.querySelector('input[name="center_select"]').addEventListener("click", (e) => {
+        const input = e.target;
+
+        center_select = input.checked;
+
+        if(input.checked){
+            document.getElementById('edit_rect').style.backgroundColor = RGBColor.buildRGB(RGBColor.correctValues(RGBColor.addRGB(piece.color, GUI_EDIT_CENTER_COLOR)));
+            edit_span.style.visibility = 'visible';
+        }
+        else{
+            document.getElementById('edit_rect').style.backgroundColor = RGBColor.buildRGB(BLACK);
+            edit_span.style.visibility = 'hidden';
+        }
+    })
 }
 
 function createField(input_name, input_value, label_value, fieldset, type = 'text') {
