@@ -207,9 +207,14 @@ class Piece {
             };
         }
         else {
-            center = { x: 0, y: blocks.shift().y };
+            let mapped_blocks = blocks;
+            if(blocks[0].x != 0){
+                const offset = blocks[0].x;
+                mapped_blocks = blocks.map(b => ({x: b.x - offset, y: b.y}));
+            }
+            center = { x: mapped_blocks[0].x, y: mapped_blocks.shift().y };
             return {
-                blocks,
+                blocks: mapped_blocks,
                 center,
                 rotatable: false
             };

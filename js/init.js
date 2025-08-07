@@ -1,13 +1,13 @@
 ; document.addEventListener("DOMContentLoaded", init);
 
 const DELTA_TIME = 50; // Tiempo que transcurre entre cada frame (depende del ordenador pero como es un tetris se puede asumir así)
-const INITIAL_PIECE_FALL_FACTOR = 20; // Cada cuantos frames cae la pieza hacia abajo en el nivel más fácil
+const INITIAL_PIECE_FALL_FACTOR = 30; // Cada cuantos frames cae la pieza hacia abajo en el nivel más fácil
 
 /**
  * 1000ms/DELTA_TIME = FRAMES_PER_SECOND
  */
 
-const GAME_VERSION = 'alpha 0.4'; // Versión del juego
+const GAME_VERSION = 'beta 0.1'; // Versión del juego
 
 const COLUMNS = 11;
 const MAX_PIECE_WIDTH = 5;
@@ -17,7 +17,10 @@ const INNER_SQUARE_SIZE = 5;
 const PIECE_BORDER_COLOR = { r: -50, g: -50, b: -50, a: 1 };
 
 const GRID_COLOR = { r: 47, g: 47, b: 51, a: 1 };
+const GRID_WIDTH = 2;
+
 const GUI_BACKGROUND_COLOR = { r: 13, g: 13, b: 53, a: 1 };
+const GUI_EDIT_CENTER_COLOR = {r: -170, g: -170, b: -170, a: 1};
 
 const CELL_SIZE_REDUCTION = 1;
 
@@ -38,19 +41,19 @@ const DEFAULT_NEW_PIECE = {
 };
 
 
-const DEBUG_MODE = true; //Activate debug mode
+const DEBUG_MODE = false; //Activate debug mode
 
 // Debug Constants
 const DEBUG_INSPECTED_CELL_COLOR = { r: 255, g: 255, b: 255, a: 1 };
 const DEBUG_RED_CROSS_COLOR = { r: 255, g: 0, b: 0, a: 1 };
-const DEBUG_DRAW_WAIT = 10;
+const DEBUG_DRAW_WAIT = 100;
 
 
 let game_board;
-let double_click;
 let timeout;
-let game_paused;
-let game_started;
+let game_paused = false;
+let game_started = false;
+let center_select = false;
 
 function init() {
     const start_buttons = document.getElementsByClassName('start_button');
@@ -146,7 +149,7 @@ function startGame(e) {
 
     for (let i = 0; i < gui_elements.length; i++) {
         gui_elements.item(i).style.display = 'flex';
-        gui_elements.item(i).style.backgroundColor = RGBColor.buildRGB(RGBColor.createColorObject(GUI_BACKGROUND_COLOR.r, GUI_BACKGROUND_COLOR.g, GUI_BACKGROUND_COLOR.b));
+        gui_elements.item(i).style.backgroundColor = RGBColor.buildRGB(GUI_BACKGROUND_COLOR);
     }
 
     const points_manager = getPointsGUI();
@@ -181,7 +184,7 @@ function pauseGame() {
 
 function resumeGame() {
     if (game_board) {
-        game_board.startGame();
+        game_board.resumeGame();
         document.querySelector('#pause_rect').style.visibility = 'hidden';
         game_paused = false;
     }
@@ -201,7 +204,7 @@ function showAndGetDebugGUI() {
 
     for (let i = 0; i < debug_gui.length; i++) { // Forma vaga de mostrar el cuadro de texto debug
         debug_gui.item(i).style.display = 'flex';
-        debug_gui.item(i).style.backgroundColor = RGBColor.buildRGB(RGBColor.createColorObject(GUI_BACKGROUND_COLOR.r, GUI_BACKGROUND_COLOR.g, GUI_BACKGROUND_COLOR.b));
+        debug_gui.item(i).style.backgroundColor = RGBColor.buildRGB(GUI_BACKGROUND_COLOR);
     }
 
     debug_labels.fall_speed = document.querySelector('.text_info_rect > [name="debug_fall_speed"]');
@@ -280,7 +283,7 @@ function editPiece(e) {
     div.className = 'edit_piece_visualizer';
     div.style.backgroundColor = RGBColor.buildRGB(GUI_BACKGROUND_COLOR);
 
-    const piece_visualizer = PieceVisualizer.createPieceVisualizer(canvas);
+    const piece_visualizer = PieceVisualizer.createPieceVisualizer(canvas, true);
     piece_visualizer.drawPiece(piece);
 
     canvas.piece_visualizer = piece_visualizer;
@@ -293,30 +296,43 @@ function editPiece(e) {
     createField('name', piece.name, 'Name:', edit_fieldset);
     createField('weight', piece.weight, 'Weight:', edit_fieldset);
     createField('color', RGBColor.RGBColortoHex(piece.color), 'Color:', edit_fieldset, 'color');
+    createField('center_select', "", 'Select piece center mode:', edit_fieldset, 'checkbox');
+
     //createField('rotatable', piece.rotatable, 'Rotatable:', edit_fieldset, 'checkbox');
-
+    
     const buttons_div = document.createElement('div');
-
+    
     buttons_div.className = 'buttons_div';
-
+    
     const save_button = document.createElement('button');
     save_button.textContent = 'Save';
     save_button.type = 'button';
     save_button.addEventListener("click", savePiece);
-
+    
     const delete_button = document.createElement('button');
     delete_button.textContent = 'Delete piece';
     delete_button.type = 'button';
     delete_button.addEventListener("click", deletePiece);
-
+    
     buttons_div.appendChild(save_button);
     buttons_div.appendChild(delete_button);
-
+    
     edit_form.appendChild(edit_fieldset);
-
+    
     editor_div.appendChild(div);
     editor_div.appendChild(edit_form);
     editor_div.appendChild(buttons_div);
+    
+    document.querySelector('input[name="center_select"]').addEventListener("click", (e) => {
+        const input = e.target;
+
+        center_select = input.checked;
+
+        if(input.checked)
+            document.getElementById('edit_rect').style.backgroundColor = RGBColor.buildRGB(RGBColor.correctValues(RGBColor.addRGB(piece.color, GUI_EDIT_CENTER_COLOR)));
+        else
+            document.getElementById('edit_rect').style.backgroundColor = RGBColor.buildRGB(BLACK);
+    })
 }
 
 function createField(input_name, input_value, label_value, fieldset, type = 'text') {
@@ -344,8 +360,6 @@ function createField(input_name, input_value, label_value, fieldset, type = 'tex
 
 function processEditPieceClick(e) {
 
-    //setTimeout({}, 500);
-
     const canvas = e.target;
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -353,7 +367,7 @@ function processEditPieceClick(e) {
 
     const cell = canvas.piece_visualizer.getCellByCoords({ x, y });
     if (cell) {
-        canvas.piece_visualizer.toggleCell(cell);
+        canvas.piece_visualizer.toggleCell(cell, center_select);
     }
 
 }
@@ -377,7 +391,7 @@ function savePiece() { // TODO: Poner lógica y método para definir el centro d
     const piece = { name: pieceData.name, weight: pieceData.weight, color: [parsed_color.r, parsed_color.g, parsed_color.b], shape: piece_shape }; //TODO: cambiar el color
 
 
-    try { //TODO: Comprobar que la pieza es un grafo Hamiltoniano (No tiene partes separadas)
+    try { // Antes quería restringir aquí las piezas con partes separadas. Pero ahora creo que me hace gracia tener piezas con varias sub-piezas
         if (Piece.possible_pieces.length > index) {
             updatePieceInVisualizers(index, piece_shape, piece.name, piece.weight, parsed_color);
             Piece.possible_pieces[index] = piece;
