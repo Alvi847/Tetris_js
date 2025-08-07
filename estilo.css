@@ -135,6 +135,11 @@ fieldset {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 5px;
+}
+
+#tetris_color{
+    display: flex;
 }
 
 #pause_rect {

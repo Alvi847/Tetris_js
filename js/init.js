@@ -1,7 +1,7 @@
 ; document.addEventListener("DOMContentLoaded", init);
 
 const DELTA_TIME = 50; // Tiempo que transcurre entre cada frame (depende del ordenador pero como es un tetris se puede asumir así)
-const INITIAL_PIECE_FALL_FACTOR = 20; // Cada cuantos frames cae la pieza hacia abajo en el nivel más fácil
+const INITIAL_PIECE_FALL_FACTOR = 30; // Cada cuantos frames cae la pieza hacia abajo en el nivel más fácil
 
 /**
  * 1000ms/DELTA_TIME = FRAMES_PER_SECOND
@@ -17,6 +17,8 @@ const INNER_SQUARE_SIZE = 5;
 const PIECE_BORDER_COLOR = { r: -50, g: -50, b: -50, a: 1 };
 
 const GRID_COLOR = { r: 47, g: 47, b: 51, a: 1 };
+const GRID_WIDTH = 2;
+
 const GUI_BACKGROUND_COLOR = { r: 13, g: 13, b: 53, a: 1 };
 
 const CELL_SIZE_REDUCTION = 1;
@@ -38,12 +40,12 @@ const DEFAULT_NEW_PIECE = {
 };
 
 
-const DEBUG_MODE = true; //Activate debug mode
+const DEBUG_MODE = false; //Activate debug mode
 
 // Debug Constants
 const DEBUG_INSPECTED_CELL_COLOR = { r: 255, g: 255, b: 255, a: 1 };
 const DEBUG_RED_CROSS_COLOR = { r: 255, g: 0, b: 0, a: 1 };
-const DEBUG_DRAW_WAIT = 10;
+const DEBUG_DRAW_WAIT = 100;
 
 
 let game_board;
@@ -181,7 +183,7 @@ function pauseGame() {
 
 function resumeGame() {
     if (game_board) {
-        game_board.startGame();
+        game_board.resumeGame();
         document.querySelector('#pause_rect').style.visibility = 'hidden';
         game_paused = false;
     }

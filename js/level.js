@@ -82,7 +82,7 @@ class Level {
      */
     static changeLevel(current_level, current_fall_speed, level_points_obtained) {
         if (current_level < Level.LEVEL_TABLE.max_level) {
-            let i = current_level + 1;
+            let i = current_level;
             let new_level = current_level;
             let new_speed = current_fall_speed;
             let points = level_points_obtained;

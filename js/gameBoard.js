@@ -83,6 +83,11 @@ class GameBoard extends DrawableBoard {
         this.stopTimers();
     }
 
+    resumeGame() {
+        this.paused = false;
+        this.setTimers();
+    }
+
     startGame() {
         this.fall_speed = INITIAL_PIECE_FALL_FACTOR;
         this.current_level = 0;
@@ -208,12 +213,14 @@ class GameBoard extends DrawableBoard {
     }
 
     async processMovementEnd() {
+        this.pauseGame(); // TODO: Poner esto hace que las piezas caigan mal
+
         this.falling_piece.movementEnd();
         const newLines = await this.checkForLines();
         if (newLines > 0) { // Solo se ejecuta si se han hecho líneas
 
             // Puntos por línea en el nivel más los puntos de combo si se hacen más líneas a la vez
-            const points_obtained = Level.pointsPerLine(this.current_level) * newLines + (newLines - 1) * Level.comboPoints(this.current_level) + 10000;
+            const points_obtained = Level.pointsPerLine(this.current_level) * newLines + (newLines - 1) * Level.comboPoints(this.current_level);
 
             this.lines += newLines;
             this.points += points_obtained;
@@ -225,7 +232,6 @@ class GameBoard extends DrawableBoard {
                 this.points_in_current_level = new_level_data.points_in_level;
                 this.current_level = new_level_data.level;
                 this.fall_speed = new_level_data.fall_speed;
-                this.updateFallSpeed();
 
                 if (this.debug)
                     this.debug.updateDebugGUI(this.fall_speed, this.points_in_current_level);
@@ -233,6 +239,8 @@ class GameBoard extends DrawableBoard {
 
             this.game_text_gui_manager.updateGUICounters(this.lines, this.points, this.current_level);
         }
+        this.resumeGame();
+
         this.spawnFallingPiece();
     }
 
@@ -246,6 +254,7 @@ class GameBoard extends DrawableBoard {
         clearInterval(this.fall_timer);
     }
 
+    // Desuso por ahora
     updateFallSpeed() {
         clearInterval(this.fall_timer);
         this.fall_timer = setInterval(() => { this.can_fall_piece = true }, DELTA_TIME * this.fall_speed);
@@ -254,19 +263,18 @@ class GameBoard extends DrawableBoard {
     async checkForLines() {
         if (this.debug)
             this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size);
-        let lines = 0;
-        let upper_line = null;
+        let lines = [];
         const piece_lines = this.falling_piece.getLines();
         for (let j = 0; j < piece_lines.length; j++) {
             let is_line = true;
             let i = 0;
             while (i < this.#columns && is_line) {
 
-                await this.debugDraw({ type: 'CELL_INSPECTION', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]])
+                await this.debugDraw({ type: 'CELL_INSPECTION', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]]);
 
                 if (!this.#cells[i][piece_lines[j]].isPiece()) {
                     is_line = false;
-                    await this.debugDraw({ type: 'NO_LINE_CELL', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]])
+                    await this.debugDraw({ type: 'NO_LINE_CELL', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]]);
                 }
                 else
                     await this.debugDraw({ type: 'DEFAULT_DRAW', x: i, y: piece_lines[j] }, this.#cells[i][piece_lines[j]]);
@@ -274,36 +282,44 @@ class GameBoard extends DrawableBoard {
                 i++;
             }
             if (is_line == true) {
-                lines++;
-                if (upper_line == null)
-                    upper_line = piece_lines[j];
+                lines.push(piece_lines[j]);
                 for (let i = 0; i < this.#columns; i++) {
                     this.#cells[i][piece_lines[j]].block_num = 0;
                     this.#cells[i][piece_lines[j]].piece = null;
                 }
             }
         }
-        if (lines > 0) {
-            this.processNewLines(lines, upper_line);
+        if (lines.length > 0) {
+            await this.getPiecesDown(lines);
         }
-        return lines;
+        return lines.length;
     }
 
     async debugDraw(operationObj, ...cells) {
         if (this.debug) {
-            this.stopTimers();
             await this.debug.debugDraw(operationObj, ...cells);
-            this.setTimers();
         }
     }
 
-    processNewLines(lines, upper_line) {
-        for (let j = upper_line - 1; j > 0; j--) {
-            for (let i = 0; i < this.#columns; i++) {
-                const piece = this.#cells[i][j].piece
-                if (piece) {
-                    this.leaveCell({ x: i, y: j });
-                    this.occupyCell({ x: i, y: j + lines }, piece);
+    async getPiecesDown(lines) {
+        
+        for (let j = 0; j < lines.length; j++) {
+            const line = lines[j] - 1;
+            if (line >= 0 && line < this.#rows) {
+                for (let k = line; k > 0; k--) {
+                    for (let i = 0; i < this.#columns; i++) {
+                        if (this.debug)
+                            this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size); // Esto es horriblemente ineficiente, pero bueno, es el modo debug
+                        const piece = this.#cells[i][k].piece
+                        if (piece) {
+                            await this.debugDraw({ type: 'CELL_INSPECTION', x: i, y: k }, this.#cells[i][k]);
+                            await this.debugDraw({ type: 'DEFAULT_DRAW', x: i, y: k }, this.#cells[i][k]);
+                            this.leaveCell({ x: i, y: k });
+                            this.occupyCell({ x: i, y: k + 1 }, piece);
+                            await this.debugDraw({ type: 'CELL_INSPECTION', x: i, y: k + 1}, this.#cells[i][k + 1]);
+                            await this.debugDraw({ type: 'DEFAULT_DRAW', x: i, y: k + 1}, this.#cells[i][k + 1]);
+                        }
+                    }
                 }
             }
         }

@@ -35,23 +35,24 @@ class DrawableBoard{
             ctx.clearRect(0, 0, canvas.width, canvas.height) // Se borra todo el tablero
 
             this.drawGrid(ctx, columns, rows, cell_size);
-
+            
             for (let i = 0; i < columns; i++) {
                 for (let j = 0; j < rows; j++) {
                     cells[i][j].draw(ctx, i * cell_size + this.padding_left, j * cell_size + this.padding_up, cell_size);
                 }
             }
+
         }
     }
 
     drawGrid(ctx, columns, rows, cell_size) {
         ctx.fillStyle = RGBColor.buildRGB(GRID_COLOR);
         for (let i = 0; i <= columns; i++) {
-            ctx.fillRect(i * cell_size + this.padding_left, this.padding_up, 2, rows * cell_size);
+            ctx.fillRect(i * cell_size + this.padding_left, this.padding_up, GRID_WIDTH, rows * cell_size);
         }
 
         for (let i = 0; i <= rows; i++) {
-            ctx.fillRect(this.padding_left, i * cell_size + this.padding_up, columns * cell_size, 2);
+            ctx.fillRect(this.padding_left, i * cell_size + this.padding_up, columns * cell_size, GRID_WIDTH);
         }
 
         ctx.fillStyle = '#000';
