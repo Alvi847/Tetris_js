@@ -28,6 +28,7 @@ class DrawableBoard{
 
     }
 
+    // Igual puedo refactorizar estos métodos
     draw(canvas, columns, rows, cells, cell_size) {
         if (canvas.getContext) {
             const ctx = canvas.getContext("2d");
