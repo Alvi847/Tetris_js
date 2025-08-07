@@ -63,7 +63,7 @@ class Piece {
             "weight": '5'
         },
         {
-            "name": 'Purple Camila',
+            "name": 'Purple L',
             "color": ['96', '54', '168'],
             "shape": [
                 ['X', 'C', 'X'],
@@ -81,7 +81,7 @@ class Piece {
             "weight": '20'
         },
         {
-            "name": 'T',
+            "name": 'Light blue T',
             "color": ['0', '255', '255'],
             "shape": [
                 ['O', 'X', 'O'],
