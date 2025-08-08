@@ -290,7 +290,7 @@ class GameBoard extends DrawableBoard {
             }
         }
         if (lines.length > 0) {
-            await this.getPiecesDown(lines);
+            await this.getPiecesDown(lines.sort((a, b) => a - b)); // Se ordena en orden ascendente primero (las líneas de más abajo tienen la y más alta)
         }
         return lines.length;
     }
@@ -306,7 +306,7 @@ class GameBoard extends DrawableBoard {
         for (let j = 0; j < lines.length; j++) {
             const line = lines[j] - 1;
             if (line >= 0 && line < this.#rows) {
-                for (let k = line; k > 0; k--) {
+                for (let k = line; k >= 0; k--) {
                     for (let i = 0; i < this.#columns; i++) {
                         if (this.debug)
                             this.draw(this.#canvas, this.#columns, this.#rows, this.#cells, this.#cell_size); // Esto es horriblemente ineficiente, pero bueno, es el modo debug
