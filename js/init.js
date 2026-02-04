@@ -54,6 +54,7 @@ let timeout;
 let game_paused = false;
 let game_started = false;
 let center_select = false;
+let pieces_array = [];
 
 function init() {
     const start_buttons = document.getElementsByClassName('start_button');
@@ -238,7 +239,7 @@ function addEditPieceEntry(id, piece) {
 }
 
 function openEditMenu() {
-    if (Piece.parsed_pieces.length == 0) {
+    if (pieces_array.length == 0) {
         loadAvailablePieces();
     }
 
@@ -247,7 +248,7 @@ function openEditMenu() {
 }
 
 function loadAvailablePieces() {
-    const pieces_array = Piece.loadHardCodedPieces(0);
+    pieces_array = Piece.loadHardCodedPieces(0);
 
     for (let i = 0; i < pieces_array.length; i++) {
         addEditPieceEntry(i, pieces_array[i]);
@@ -468,7 +469,6 @@ function goToMainMenu() {
 
     // Quitamos el tablero de la pantalla para que no aparezca detrás de algún menú fuera del juego
     document.getElementById('game_board_container').style.visibility = 'hidden';
-
 
 }
 
