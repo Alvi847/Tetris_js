@@ -63,6 +63,8 @@ function init() {
     const pause_buttons = document.getElementsByClassName('pause_button');
     const exit_buttons = document.getElementsByClassName('exit_button');
 
+    const save_game_buttons = document.getElementsByClassName('save_game_button');
+
     const add_piece_button = document.getElementsByClassName('add_piece_button');
     add_piece_button.item(0).addEventListener("click", addPiece);
 
@@ -93,6 +95,10 @@ function init() {
 
     for (const pause_button of pause_buttons) {
         pause_button.addEventListener("click", pauseGame);
+    }
+
+    for (const save_game_button of save_game_buttons) {
+        save_game_button.addEventListener("click", saveGame);
     }
 
     for (const exit_button of exit_buttons) {
@@ -485,4 +491,24 @@ function addPiece() {
     Piece.parsed_pieces.push(piece_obj);
 
     addEditPieceEntry(Piece.parsed_pieces.length - 1, piece_obj);
+}
+
+function saveGame(){
+    const game_json = game_board.createGameJson();
+
+    downloadFile(game_json, 'tetris_js_save.json', 'application/json');
+}
+
+function downloadFile(data, filename, type = 'text/plain') {
+    const blob = new Blob([data], { type });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 }

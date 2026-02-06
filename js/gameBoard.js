@@ -347,6 +347,17 @@ class GameBoard extends DrawableBoard {
         return coords.y < 0 || coords.y > this.#rows - 1 || coords.x < 0 || coords.x > this.#columns - 1;
     }
 
+    createGameJson(){
+        const ret = {};
+        ret.lines = this.lines;
+        ret.points = this.points;
+        ret.level = this.current_level;
+        ret.pieces = Piece.parsed_pieces;
+        ret.columns = COLUMNS;
+        ret.cells = this.#cells;
+        return JSON.stringify(ret);
+    }
+
     constructor(canvas, rows, columns, cells, cell_size, next_piece_visualizer, padding_left, padding_up, game_text_gui_manager, starting_x) {
         super(padding_left, padding_up, starting_x, 0);
         this.#canvas = canvas;
